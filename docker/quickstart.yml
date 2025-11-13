@@ -1,0 +1,79 @@
+services:
+  ### POSTGRES ###
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=defaultdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Montamos el script de inicialización
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - intranet
+
+  ### KRATOS ###
+  kratos-migrate:
+    image: oryd/kratos:latest
+    environment:
+      - DSN=postgres://admin:secret@postgres:5432/kratos_db?sslmode=disable
+    volumes:
+      - ./config:/etc/config/kratos
+    command: -c /etc/config/kratos/kratos.yml migrate sql -e --yes
+    restart: on-failure
+    networks:
+      - intranet
+
+  kratos:
+    depends_on:
+      - kratos-migrate
+    image: oryd/kratos:latest
+    ports:
+      - "4433:4433"
+      - "4434:4434"
+    environment:
+      - DSN=postgres://admin:secret@postgres:5432/kratos_db?sslmode=disable
+      - LOG_LEVEL=trace
+    command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
+    volumes:
+      - ./config:/etc/config/kratos
+    networks:
+      - intranet
+
+  ### HYDRA ###
+  hydra-migrate:
+    image: oryd/hydra:latest
+    environment:
+      - DSN=postgres://admin:secret@postgres:5432/hydra_db?sslmode=disable
+    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    volumes:
+      - ./config:/etc/config/hydra
+    restart: on-failure
+    networks:
+      - intranet
+
+  hydra:
+    image: oryd/hydra:latest
+    ports:
+      - "4444:4444"
+      - "4445:4445"
+      - "5555:5555"
+    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    environment:
+      - DSN=postgres://admin:secret@postgres:5432/hydra_db?sslmode=disable
+    volumes:
+      - ./config:/etc/config/hydra
+    restart: unless-stopped
+    depends_on:
+      - hydra-migrate
+    networks:
+      - intranet
+
+networks:
+  intranet:
+
+volumes:
+  postgres-data:

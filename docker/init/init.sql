@@ -1,0 +1,2 @@
+CREATE DATABASE kratos_db;
+CREATE DATABASE hydra_db;

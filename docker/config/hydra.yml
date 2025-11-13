@@ -1,0 +1,45 @@
+serve:
+  cookies:
+    same_site_mode: Lax
+strategies:
+  access_token: jwt
+  jwt:
+    scope_claim: list
+urls:
+  self:
+    issuer: http://localhost:4444
+  consent: http://localhost:4455/consent
+  login: http://localhost:4455/login
+  logout: http://localhost:4455/logout
+  identity_provider:
+    publicUrl: http://localhost:4433
+    url: http://localhost:4434
+webfinger:
+  oidc_discovery:
+    supported_claims:
+      - email
+      - name
+    supported_scope:
+      - offline_access
+      - offline
+      - openid
+      - email
+      - profile
+
+secrets:
+  system:
+    - youReallyNeedToChangeThis
+oidc:
+  subject_identifiers:
+    supported_types:
+      - pairwise
+      - public
+    pairwise:
+      salt: youReallyNeedToChangeThis
+oauth2:
+  allowed_top_level_claims:
+    - email
+    - name
+log:
+  leak_sensitive_values: true
+  level: debug

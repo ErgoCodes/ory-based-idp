@@ -10,7 +10,12 @@
     "prepare": "husky",
     "commit": "cz",
     "commitlint": "commitlint --verbose --color",
-    "check-types": "turbo check-types"
+    "check-types": "turbo check-types",
+    "infra:up": "docker compose -f docker/quickstart.yml up -d",
+    "infra:down": "docker compose -f docker/quickstart.yml down",
+    "infra:rebuild": "docker compose -f docker/quickstart.yml up --build",
+    "infra:logs": "docker compose -f docker/quickstart.yml logs -f",
+    "dev:all": "pnpm infra:up && pnpm dev"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

@@ -1,0 +1,12 @@
+{
+  "extends": "@workspace/typescript-config/base.js",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@workspace/api": ["packages/api/src"],
+      "@workspace/api/*": ["packages/api/src/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@repo/api",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "dev": "concurrently \"tsc --watch\" \"tsc -p tsconfig.cjs.json --watch\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.9.2",
+    "@workspace/typescript-config": "workspace:*"
+  },
+  "exports": {
+    "./dtos/*": "./src/dtos/*.ts"
+  }
+}

@@ -3,7 +3,8 @@
   "type": "commonjs",
   "scripts": {
     "build": "tsc && tsc -p tsconfig.cjs.json",
-    "dev": "concurrently \"tsc --watch\" \"tsc -p tsconfig.cjs.json --watch\""
+    "dev": "concurrently \"tsc --watch\" \"tsc -p tsconfig.cjs.json --watch\"",
+    "lint:fix": "pnpm lint"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

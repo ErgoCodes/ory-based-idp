@@ -11,12 +11,11 @@ ROCKET='\xF0\x9F\x9A\x80'   # Rocket emoji
 
 # Print messages with colors and emojis
 echo -e "${YELLOW}${ROCKET} Prepare precommit... ${RESET}"
-echo -e "${YELLOW}${ROCKET} Running lint-staged... ${RESET}"
+echo -e "${YELLOW}${ROCKET} Running checks... ${RESET}"
+
+# Ejecutar lint, format y type checking
 pnpm lint
 pnpm format
 pnpm check-types
-
-echo -e "${YELLOW}${ROCKET} Add changes to git... ${RESET}"
-git add .
 
 echo -e "${GREEN}${CHECK_MARK} Precommit done! ${RESET}"

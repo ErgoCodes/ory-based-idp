@@ -1,7 +1,7 @@
 services:
   ### POSTGRES ###
   postgres:
-    image: postgres:15
+    image: postgres:17
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=secret
@@ -15,9 +15,24 @@ services:
     networks:
       - intranet
 
+        ### PGADMIN ###
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80" # Acceso a pgAdmin via http://localhost:5050
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - intranet
+
   ### KRATOS ###
   kratos-migrate:
-    image: oryd/kratos:latest
+    image: oryd/kratos:v25.4.0
     environment:
       - DSN=postgres://admin:secret@postgres:5432/kratos_db?sslmode=disable
     volumes:
@@ -30,7 +45,7 @@ services:
   kratos:
     depends_on:
       - kratos-migrate
-    image: oryd/kratos:latest
+    image: oryd/kratos:v25.4.0
     ports:
       - "4433:4433"
       - "4434:4434"
@@ -45,7 +60,7 @@ services:
 
   ### HYDRA ###
   hydra-migrate:
-    image: oryd/hydra:latest
+    image: oryd/hydra:v25.4.0
     environment:
       - DSN=postgres://admin:secret@postgres:5432/hydra_db?sslmode=disable
     command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
@@ -56,7 +71,7 @@ services:
       - intranet
 
   hydra:
-    image: oryd/hydra:latest
+    image: oryd/hydra:v25.4.0
     ports:
       - "4444:4444"
       - "4445:4445"
@@ -77,3 +92,4 @@ networks:
 
 volumes:
   postgres-data:
+  pgadmin-data:

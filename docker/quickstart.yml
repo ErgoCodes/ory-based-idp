@@ -15,7 +15,7 @@ services:
     networks:
       - intranet
 
-        ### PGADMIN ###
+  ### PGADMIN ###
   pgadmin:
     image: dpage/pgadmin4:latest
     environment:
@@ -27,6 +27,8 @@ services:
       - postgres
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+      - ./config/pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./config/pgadmin/pgpass:/pgpass:ro
     networks:
       - intranet
 

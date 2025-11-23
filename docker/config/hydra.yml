@@ -8,9 +8,11 @@ strategies:
 urls:
   self:
     issuer: http://localhost:4444
-  consent: http://localhost:4455/consent
-  login: http://localhost:4455/login
-  logout: http://localhost:4455/logout
+  # These URLs point to the Login/Consent Provider (apps/web)
+  consent: http://localhost:8362/oauth2/consent
+  login: http://localhost:8362/oauth2/login
+  logout: http://localhost:8362/oauth2/logout
+  post_logout_redirect: http://localhost:8362/oauth2/logged-out
   identity_provider:
     publicUrl: http://localhost:4433
     url: http://localhost:4434

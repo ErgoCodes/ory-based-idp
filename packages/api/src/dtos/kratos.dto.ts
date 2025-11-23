@@ -1,31 +1,65 @@
-import z from "zod"
+import { z } from "zod"
 
-// Schema para traits de usuario (estructura de Kratos)
-export const userTraitsSchema = z.object({
-  email: z.string().email(),
-  name: z.object({
-    first: z.string(),
-    last: z.string(),
-  }),
+// ============================================
+// Registration DTOs
+// ============================================
+
+export const RegisterUserSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
 })
 
-// Schema para identidad de Kratos
+export type RegisterUser = z.infer<typeof RegisterUserSchema>
+
+// ============================================
+// Identity DTOs
+// ============================================
+
+export const IdentityTraitsSchema = z.object({
+  email: z.string().email(),
+  name: z
+    .object({
+      first: z.string(),
+      last: z.string(),
+    })
+    .optional(),
+})
+
+export type IdentityTraits = z.infer<typeof IdentityTraitsSchema>
+
 export const kratosIdentitySchema = z.object({
   id: z.string(),
   schema_id: z.string(),
-  traits: userTraitsSchema,
-  created_at: z.string(),
-  updated_at: z.string(),
+  traits: IdentityTraitsSchema,
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
 })
 
-// Schema para sesión de Kratos
+export type Identity = z.infer<typeof kratosIdentitySchema>
+
+// ============================================
+// Session DTOs
+// ============================================
+
 export const kratosSessionSchema = z.object({
   id: z.string(),
-  active: z.boolean(),
-  expires_at: z.string(),
-  authenticated_at: z.string(),
+  active: z.boolean().optional(),
+  expires_at: z.string().optional(),
+  authenticated_at: z.string().optional(),
+  identity: kratosIdentitySchema,
 })
 
-export type UserTraits = z.infer<typeof userTraitsSchema>
-export type KratosIdentity = z.infer<typeof kratosIdentitySchema>
-export type KratosSession = z.infer<typeof kratosSessionSchema>
+export type Session = z.infer<typeof kratosSessionSchema>
+
+// ============================================
+// Login DTOs (renamed to avoid conflict with Hydra)
+// ============================================
+
+export const KratosLoginCredentialsSchema = z.object({
+  identifier: z.string().email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
+})
+
+export type KratosLoginCredentials = z.infer<typeof KratosLoginCredentialsSchema>

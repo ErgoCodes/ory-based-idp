@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { OryClientModule } from './ory-client/ory-client.module';
 import { KratosModule } from './kratos/kratos.module';
 import { AuthModule } from './auth/auth.module';
+import { HydraModule } from './hydra/hydra.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
     OryClientModule,
     KratosModule,
     AuthModule,
+    HydraModule,
   ],
   controllers: [],
   providers: [],

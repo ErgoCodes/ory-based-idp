@@ -19,12 +19,8 @@ export class AuthController {
 
   @Get('registration/init')
   async initRegistration() {
-    const flow = await this.kratosService.createRegistrationFlow();
-    return {
-      flowId: flow.id,
-      ui: flow.ui,
-      expiresAt: flow.expires_at,
-    };
+    // Return Result directly - interceptor will handle errors
+    return this.kratosService.createRegistrationFlow();
   }
 
   @Post('registration')
@@ -33,19 +29,19 @@ export class AuthController {
     @Query('flow') flowId: string,
     @Body(new ZodValidationPipe(registerUserSchema)) userData: RegisterUserDto,
   ) {
-    if (!flowId) {
-      // Si no hay flowId, crear uno nuevo
-      const flow = await this.kratosService.createRegistrationFlow();
-      flowId = flow.id;
+    let actualFlowId = flowId;
+
+    if (!actualFlowId) {
+      // If no flowId, create a new one
+      const flowResult = await this.kratosService.createRegistrationFlow();
+      if (!flowResult.success) {
+        return flowResult;
+      }
+      actualFlowId = flowResult.value.id;
     }
 
-    const result = await this.kratosService.registerUser(flowId, userData);
-
-    return {
-      success: true,
-      identity: result.identity,
-      session: result.session,
-    };
+    // Return Result directly - interceptor will handle errors
+    return this.kratosService.registerUser(actualFlowId, userData);
   }
 
   @Post('users')
@@ -53,12 +49,8 @@ export class AuthController {
   async createUser(
     @Body(new ZodValidationPipe(registerUserSchema)) userData: RegisterUserDto,
   ) {
-    const identity = await this.kratosService.createIdentity(userData);
-
-    return {
-      success: true,
-      identity,
-    };
+    // Return Result directly - interceptor will handle errors
+    return this.kratosService.createIdentity(userData);
   }
 
   @Get('users')
@@ -66,11 +58,13 @@ export class AuthController {
     @Query('pageSize') pageSize?: number,
     @Query('pageToken') pageToken?: string,
   ) {
-    return await this.kratosService.listIdentities(pageSize, pageToken);
+    // Return Result directly - interceptor will handle errors
+    return this.kratosService.listIdentities(pageSize, pageToken);
   }
 
   @Get('users/:id')
   async getUser(@Param('id') id: string) {
-    return await this.kratosService.getIdentity(id);
+    // Return Result directly - interceptor will handle errors
+    return this.kratosService.getIdentity(id);
   }
 }

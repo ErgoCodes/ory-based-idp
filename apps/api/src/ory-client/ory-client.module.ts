@@ -1,6 +1,11 @@
 import { Module, Global, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Configuration, FrontendApi, IdentityApi } from '@ory/client-fetch';
+import {
+  Configuration,
+  FrontendApi,
+  IdentityApi,
+  OAuth2Api,
+} from '@ory/client-fetch';
 
 const frontendApiProvider = {
   provide: FrontendApi,
@@ -44,9 +49,30 @@ const identityApiProvider = {
   inject: [ConfigService],
 };
 
+const oAuth2ApiProvider = {
+  provide: OAuth2Api,
+  useFactory: (configService: ConfigService) => {
+    const logger = new Logger('OAuth2Api');
+    const hydraAdminUrl =
+      configService.get<string>('HYDRA_ADMIN_URL') || 'http://localhost:4445';
+
+    logger.log(`Initializing OAuth2Api with URL: ${hydraAdminUrl}`);
+
+    const configuration = new Configuration({
+      basePath: hydraAdminUrl,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      fetchApi: fetch,
+    });
+    return new OAuth2Api(configuration);
+  },
+  inject: [ConfigService],
+};
+
 @Global()
 @Module({
-  providers: [frontendApiProvider, identityApiProvider],
-  exports: [FrontendApi, IdentityApi],
+  providers: [frontendApiProvider, identityApiProvider, oAuth2ApiProvider],
+  exports: [FrontendApi, IdentityApi, OAuth2Api],
 })
 export class OryClientModule {}

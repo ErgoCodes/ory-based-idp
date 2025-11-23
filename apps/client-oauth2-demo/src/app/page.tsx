@@ -1,44 +1,58 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { initiateOAuth2Flow } from "@/lib/pkce"
-import { getUserClaims, isAuthenticated } from "@/lib/token-manager"
-import { performCompleteLogout } from "@/lib/logout"
+import { useSession, signIn, signOut } from "next-auth/react"
 
 export default function HomePage() {
-  const [userClaims, setUserClaims] = useState<{
-    sub: string
-    email?: string
-    name?: string
-  } | null>(null)
+  const { data: session, status } = useSession()
 
-  useEffect(() => {
-    // Check if user is already authenticated
-    if (isAuthenticated()) {
-      const claims = getUserClaims()
-      setUserClaims(claims)
-    }
-  }, [])
-
-  const handleLogin = async () => {
-    const authEndpoint = process.env.NEXT_PUBLIC_OAUTH2_AUTHORIZATION_ENDPOINT
-    const clientId = process.env.NEXT_PUBLIC_OAUTH2_CLIENT_ID
-    const redirectUri = process.env.NEXT_PUBLIC_OAUTH2_REDIRECT_URI
-    const scope = process.env.NEXT_PUBLIC_OAUTH2_SCOPE || "openid email profile offline_access"
-
-    if (!authEndpoint || !clientId || !redirectUri) {
-      alert("OAuth2 configuration is incomplete. Please check your .env.local file.")
-      return
-    }
-
-    await initiateOAuth2Flow(authEndpoint, clientId, redirectUri, scope)
+  const handleLogin = () => {
+    signIn("hydra")
   }
 
   const handleLogout = () => {
-    // Use OIDC logout flow
-    // Only pass post_logout_redirect_uri if client has it configured
-    // For now, don't pass it - will use Hydra's default
-    performCompleteLogout()
+    signOut({ callbackUrl: "/" })
+  }
+
+  if (status === "loading") {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          fontFamily: "system-ui, sans-serif",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div
+            className="spinner"
+            style={{
+              display: "inline-block",
+              width: "2rem",
+              height: "2rem",
+              border: "4px solid #f3f3f3",
+              borderTop: "4px solid #3b82f6",
+              borderRadius: "50%",
+            }}
+          ></div>
+          <p style={{ marginTop: "1rem" }}>Loading...</p>
+        </div>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            .spinner {
+              animation: spin 1s linear infinite;
+            }
+          `,
+          }}
+        />
+      </div>
+    )
   }
 
   return (
@@ -63,9 +77,11 @@ export default function HomePage() {
           maxWidth: "400px",
         }}
       >
-        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", margin: 0 }}>OAuth2 Client Demo</h1>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", margin: 0 }}>
+          OAuth2 Client Demo with NextAuth
+        </h1>
 
-        {userClaims ? (
+        {session ? (
           <div style={{ textAlign: "center", width: "100%" }}>
             <div
               style={{
@@ -84,19 +100,29 @@ export default function HomePage() {
                   marginBottom: "0.5rem",
                 }}
               >
-                ✓ Authenticated
+                ✓ Authenticated with NextAuth
               </p>
-              {userClaims.name && (
-                <p style={{ fontSize: "0.875rem", margin: "0.25rem 0" }}>Name: {userClaims.name}</p>
-              )}
-              {userClaims.email && (
+              {session.user.name && (
                 <p style={{ fontSize: "0.875rem", margin: "0.25rem 0" }}>
-                  Email: {userClaims.email}
+                  Name: {session.user.name}
+                </p>
+              )}
+              {session.user.email && (
+                <p style={{ fontSize: "0.875rem", margin: "0.25rem 0" }}>
+                  Email: {session.user.email}
                 </p>
               )}
               <p style={{ fontSize: "0.75rem", color: "#666", marginTop: "0.5rem" }}>
-                Subject: {userClaims.sub}
+                ID: {session.user.id}
               </p>
+              {session.error && (
+                <p style={{ fontSize: "0.75rem", color: "#dc2626", marginTop: "0.5rem" }}>
+                  ⚠️{" "}
+                  {session.error === "RefreshAccessTokenError"
+                    ? "Session expired. Please log in again."
+                    : session.error}
+                </p>
+              )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               <a
@@ -174,9 +200,9 @@ export default function HomePage() {
             marginTop: "1rem",
           }}
         >
-          This is a demo OAuth2 client application.
+          This demo uses NextAuth.js with a custom Hydra OAuth2 provider.
           <br />
-          It uses Hydra for authentication.
+          Includes automatic token refresh and PKCE support.
         </p>
       </div>
     </div>

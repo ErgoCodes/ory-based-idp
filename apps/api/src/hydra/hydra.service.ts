@@ -217,6 +217,80 @@ export class HydraService {
   }
 
   /**
+   * Update an existing OAuth2 client in Hydra
+   */
+  async updateOAuth2Client(
+    clientId: string,
+    clientData: CreateOAuth2Client,
+  ): Promise<Result<OAuth2Client, HydraError>> {
+    try {
+      const response = await this.hydraAdmin.setOAuth2Client({
+        id: clientId,
+        oAuth2Client: clientData,
+      });
+
+      const client = HydraMapper.toOAuth2Client(response);
+      return ResultUtils.ok(client);
+    } catch (error) {
+      const hydraError = HydraErrorHandler.handle(
+        error,
+        'update_client',
+        'Failed to update OAuth2 client',
+      );
+      return ResultUtils.err(hydraError);
+    }
+  }
+
+  /**
+   * List all OAuth2 clients in Hydra
+   */
+  async listOAuth2Clients(
+    pageSize = 100,
+    pageToken?: string,
+  ): Promise<Result<OAuth2Client[], HydraError>> {
+    try {
+      const response = await this.hydraAdmin.listOAuth2Clients({
+        pageSize,
+        pageToken,
+      });
+
+      const clients = response.map((client) =>
+        HydraMapper.toOAuth2Client(client),
+      );
+      return ResultUtils.ok(clients);
+    } catch (error) {
+      const hydraError = HydraErrorHandler.handle(
+        error,
+        'list_clients',
+        'Failed to list OAuth2 clients',
+      );
+      return ResultUtils.err(hydraError);
+    }
+  }
+
+  /**
+   * Delete an OAuth2 client from Hydra
+   */
+  async deleteOAuth2Client(
+    clientId: string,
+  ): Promise<Result<void, HydraError>> {
+    try {
+      await this.hydraAdmin.deleteOAuth2Client({
+        id: clientId,
+      });
+
+      return ResultUtils.ok(undefined);
+    } catch (error) {
+      const hydraError = HydraErrorHandler.handle(
+        error,
+        'delete_client',
+        'Failed to delete OAuth2 client',
+      );
+      return ResultUtils.err(hydraError);
+    }
+  }
+
+  /**
    * Fetch logout request details from Hydra
    */
   async getLogoutRequest(challenge: string): Promise<Result<any, HydraError>> {

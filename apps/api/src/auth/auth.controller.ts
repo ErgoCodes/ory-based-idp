@@ -67,4 +67,14 @@ export class AuthController {
     // Return Result directly - interceptor will handle errors
     return this.kratosService.getIdentity(id);
   }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() credentials: { email: string; password: string }) {
+    // Return Result directly - interceptor will handle errors
+    return this.kratosService.verifyCredentials(
+      credentials.email,
+      credentials.password,
+    );
+  }
 }

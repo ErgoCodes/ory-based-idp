@@ -2,10 +2,14 @@ import {
   Controller,
   Get,
   Post,
+  Put,
+  Delete,
   Query,
   Body,
   Param,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { HydraService } from './hydra.service';
 import { KratosService } from '../kratos/kratos.service';
@@ -229,6 +233,31 @@ export class HydraController {
   }
 
   /**
+   * GET /oauth2/clients
+   */
+  @Get('clients')
+  async listClients(
+    @Query('pageSize') pageSize?: number,
+    @Query('pageToken') pageToken?: string,
+  ) {
+    const result = await this.hydraService.listOAuth2Clients(
+      pageSize,
+      pageToken,
+    );
+
+    if (!result.success) {
+      return result;
+    }
+
+    return {
+      success: true,
+      value: result.value.map((client) =>
+        ResponseMapper.toPublicOAuth2Client(client),
+      ),
+    };
+  }
+
+  /**
    * GET /oauth2/clients/:id
    */
   @Get('clients/:id')
@@ -250,6 +279,63 @@ export class HydraController {
     return {
       success: true,
       value: ResponseMapper.toPublicOAuth2Client(result.value),
+    };
+  }
+
+  /**
+   * PUT /oauth2/clients/:id
+   */
+  @Put('clients/:id')
+  async updateClient(
+    @Param('id') clientId: string,
+    @Body(new ZodValidationPipe(CreateOAuth2ClientSchema))
+    clientData: CreateOAuth2Client,
+  ) {
+    if (!clientId) {
+      throw new BadRequestException({
+        error: 'missing_client_id',
+        error_description: 'Client ID parameter is required',
+        error_hint: 'Please provide a valid client ID',
+      });
+    }
+
+    const result = await this.hydraService.updateOAuth2Client(
+      clientId,
+      clientData,
+    );
+
+    if (!result.success) {
+      return result;
+    }
+
+    return {
+      success: true,
+      value: ResponseMapper.toOAuth2ClientCreationResponse(result.value),
+    };
+  }
+
+  /**
+   * DELETE /oauth2/clients/:id
+   */
+  @Delete('clients/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteClient(@Param('id') clientId: string) {
+    if (!clientId) {
+      throw new BadRequestException({
+        error: 'missing_client_id',
+        error_description: 'Client ID parameter is required',
+        error_hint: 'Please provide a valid client ID',
+      });
+    }
+
+    const result = await this.hydraService.deleteOAuth2Client(clientId);
+
+    if (!result.success) {
+      return result;
+    }
+
+    return {
+      success: true,
     };
   }
 

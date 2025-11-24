@@ -1,29 +1,50 @@
-import z from "zod"
-import { kratosIdentitySchema, kratosSessionSchema } from "./kratos.dto"
+import { z } from "zod"
 
-// Schema para registro de usuario
-export const registerUserSchema = z.object({
-  email: z.string().email({ message: "El email debe ser válido" }),
-  password: z
-    .string()
-    .min(6, { message: "La contraseña debe tener al menos 6 caracteres" })
-    .max(100, { message: "La contraseña no puede exceder 100 caracteres" }),
-  firstName: z
-    .string()
-    .min(1, { message: "El nombre es requerido" })
-    .max(50, { message: "El nombre no puede exceder 50 caracteres" }),
-  lastName: z
-    .string()
-    .min(1, { message: "El apellido es requerido" })
-    .max(50, { message: "El apellido no puede exceder 50 caracteres" }),
+// User Management DTOs
+
+export const UpdateProfileSchema = z.object({
+  name: z
+    .object({
+      first: z.string().min(1, "First name is required"),
+      last: z.string().min(1, "Last name is required"),
+    })
+    .optional(),
+  email: z.string().email("Invalid email format").optional(),
 })
 
-// Schema para respuesta de registro
-export const registrationResponseSchema = z.object({
-  success: z.boolean(),
-  identity: kratosIdentitySchema,
-  session: kratosSessionSchema.optional(),
+export type UpdateProfileDto = z.infer<typeof UpdateProfileSchema>
+
+export const ChangePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(8, "New password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  })
+
+export type ChangePasswordDto = z.infer<typeof ChangePasswordSchema>
+
+export const UpdateUserSchema = z.object({
+  name: z
+    .object({
+      first: z.string().min(1, "First name is required"),
+      last: z.string().min(1, "Last name is required"),
+    })
+    .optional(),
+  email: z.string().email("Invalid email format").optional(),
+  role: z.enum(["user", "superadmin"]).optional(),
+})
+
+export type UpdateUserDto = z.infer<typeof UpdateUserSchema>
+
+export const registerUserSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
 })
 
 export type RegisterUserDto = z.infer<typeof registerUserSchema>
-export type RegistrationResponse = z.infer<typeof registrationResponseSchema>

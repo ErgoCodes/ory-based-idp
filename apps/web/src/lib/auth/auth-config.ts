@@ -1,0 +1,93 @@
+import type { NextAuthOptions } from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required")
+        }
+
+        // Call backend API to verify credentials
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password,
+          }),
+        })
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({ message: "Invalid credentials" }))
+          throw new Error(error.message || "Invalid credentials")
+        }
+
+        const data = await response.json()
+
+        if (!data || !data.user || !data.access_token) {
+          throw new Error("Invalid user data")
+        }
+
+        return {
+          id: data.user.id,
+          email: data.user.traits.email,
+          name: data.user.traits.name
+            ? `${data.user.traits.name.first} ${data.user.traits.name.last}`.trim()
+            : null,
+          role: data.user.traits.role || "user",
+          accessToken: data.access_token,
+        }
+      },
+    }),
+  ],
+
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+        token.email = user.email
+        token.name = user.name
+        token.role = user.role
+        token.accessToken = user.accessToken
+      }
+      return token
+    },
+
+    async session({ session, token }) {
+      if (token) {
+        session.user = {
+          id: token.id,
+          email: token.email,
+          name: token.name,
+          role: token.role,
+        }
+        session.accessToken = token.accessToken
+      }
+      return session
+    },
+  },
+
+  pages: {
+    signIn: "/login",
+    error: "/login",
+  },
+
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
+}

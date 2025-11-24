@@ -45,9 +45,15 @@
               "additionalProperties": false
             }
           ]
+        },
+        "role": {
+          "type": "string",
+          "enum": ["user", "superadmin"],
+          "title": "Role",
+          "default": "user"
         }
       },
-      "required": ["email"],
+      "required": ["email", "role"],
       "additionalProperties": false
     }
   }

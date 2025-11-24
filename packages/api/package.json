@@ -8,6 +8,9 @@
     "dev": "concurrently \"tsc --watch\" \"tsc -p tsconfig.cjs.json --watch\"",
     "lint:fix": "pnpm lint"
   },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2",
     "typescript": "^5.9.2",
@@ -21,6 +24,10 @@
     "./dtos/user.dto": {
       "types": "./dist/commonjs/src/dtos/user.dto.d.ts",
       "default": "./dist/commonjs/src/dtos/user.dto.js"
+    },
+    "./dtos/hydra.dto": {
+      "types": "./dist/commonjs/src/dtos/hydra.dto.d.ts",
+      "default": "./dist/commonjs/src/dtos/hydra.dto.js"
     }
   }
 }

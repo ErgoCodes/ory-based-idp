@@ -236,15 +236,6 @@ function LoginPageContent() {
             {submitting ? "Signing in..." : "Sign In"}
           </Button>
         </form>
-
-        <div className="mt-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <a href="/register" className="text-primary hover:underline">
-              Create one here
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   )

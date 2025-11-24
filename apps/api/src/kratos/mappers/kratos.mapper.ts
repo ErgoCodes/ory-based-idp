@@ -10,13 +10,19 @@ export class KratosMapper {
    * Map Kratos identity response to Identity DTO
    */
   static toIdentity(response: KratosIdentity): Identity {
+    const traits = response.traits as {
+      email: string;
+      name?: { first: string; last: string };
+      role?: 'user' | 'superadmin';
+    };
+
     return {
       id: response.id,
       schema_id: response.schema_id,
       traits: {
-        email: (response.traits as { email: string }).email,
-        name: (response.traits as { name?: { first: string; last: string } })
-          .name,
+        email: traits.email,
+        name: traits.name,
+        role: traits.role || 'user', // Default to 'user' if not specified
       },
       created_at:
         response.created_at instanceof Date

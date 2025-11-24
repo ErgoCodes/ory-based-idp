@@ -34,16 +34,20 @@ export const authOptions: NextAuthOptions = {
             throw new Error(error.message || "Invalid credentials")
           }
 
-          const user = await response.json()
+          const data = await response.json()
 
-          if (!user || !user.id) {
+          if (!data || !data.user || !data.access_token) {
             throw new Error("Invalid user data")
           }
 
           return {
-            id: user.id,
-            email: user.email,
-            name: user.name || `${user.firstName} ${user.lastName}`.trim() || null,
+            id: data.user.id,
+            email: data.user.traits.email,
+            name: data.user.traits.name
+              ? `${data.user.traits.name.first} ${data.user.traits.name.last}`.trim()
+              : null,
+            role: data.user.traits.role || "user",
+            accessToken: data.access_token,
           }
         } catch (error) {
           console.error("Auth error:", error)
@@ -59,6 +63,8 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.email = user.email
         token.name = user.name
+        token.role = user.role
+        token.accessToken = user.accessToken
       }
       return token
     },
@@ -69,7 +75,9 @@ export const authOptions: NextAuthOptions = {
           id: token.id,
           email: token.email,
           name: token.name,
+          role: token.role,
         }
+        session.accessToken = token.accessToken
       }
       return session
     },

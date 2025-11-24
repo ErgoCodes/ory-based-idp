@@ -9,20 +9,28 @@ import {
   Param,
 } from '@nestjs/common';
 import { KratosService } from '../kratos/kratos.service';
+import { JwtService } from '../common/services/jwt.service';
 import { registerUserSchema } from '@repo/api/dtos/user.dto';
 import type { RegisterUserDto } from '@repo/api/dtos/user.dto';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import { Public } from '../common/decorators/public.decorator';
+import { ResultUtils } from '../common/result';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly kratosService: KratosService) {}
+  constructor(
+    private readonly kratosService: KratosService,
+    private readonly jwtService: JwtService,
+  ) {}
 
+  @Public()
   @Get('registration/init')
   async initRegistration() {
     // Return Result directly - interceptor will handle errors
     return this.kratosService.createRegistrationFlow();
   }
 
+  @Public()
   @Post('registration')
   @HttpCode(HttpStatus.CREATED)
   async register(
@@ -44,6 +52,7 @@ export class AuthController {
     return this.kratosService.registerUser(actualFlowId, userData);
   }
 
+  @Public()
   @Post('users')
   @HttpCode(HttpStatus.CREATED)
   async createUser(
@@ -68,13 +77,33 @@ export class AuthController {
     return this.kratosService.getIdentity(id);
   }
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() credentials: { email: string; password: string }) {
-    // Return Result directly - interceptor will handle errors
-    return this.kratosService.verifyCredentials(
+    // Verify credentials
+    const result = await this.kratosService.verifyCredentials(
       credentials.email,
       credentials.password,
     );
+
+    // If verification failed, return the error
+    if (!result.success) {
+      return result;
+    }
+
+    // Generate JWT token with role
+    const identity = result.value;
+    const accessToken = this.jwtService.generateToken(
+      identity.id,
+      identity.traits.email,
+      identity.traits.role,
+    );
+
+    // Return user data with access token
+    return ResultUtils.ok({
+      user: identity,
+      access_token: accessToken,
+    });
   }
 }

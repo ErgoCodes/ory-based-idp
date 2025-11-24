@@ -25,6 +25,7 @@ export const IdentityTraitsSchema = z.object({
       last: z.string(),
     })
     .optional(),
+  role: z.enum(["user", "superadmin"]).default("user"),
 })
 
 export type IdentityTraits = z.infer<typeof IdentityTraitsSchema>

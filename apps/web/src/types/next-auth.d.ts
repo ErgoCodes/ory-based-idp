@@ -7,13 +7,17 @@ declare module "next-auth" {
       id: string
       email: string
       name?: string | null
+      role: "user" | "superadmin"
     }
+    accessToken?: string
   }
 
   interface User {
     id: string
     email: string
     name?: string | null
+    role: "user" | "superadmin"
+    accessToken?: string
   }
 }
 
@@ -22,5 +26,7 @@ declare module "next-auth/jwt" {
     id: string
     email: string
     name?: string | null
+    role: "user" | "superadmin"
+    accessToken?: string
   }
 }

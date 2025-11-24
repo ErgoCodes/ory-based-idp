@@ -175,21 +175,33 @@ export default function HomePage() {
             </div>
           </div>
         ) : (
-          <button
-            onClick={handleLogin}
-            style={{
-              padding: "0.5rem 1.5rem",
-              backgroundColor: "#3b82f6",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-            }}
-          >
-            Login with OAuth2
-          </button>
+          <>
+            <button
+              onClick={handleLogin}
+              style={{
+                padding: "0.5rem 1.5rem",
+                backgroundColor: "#3b82f6",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+              }}
+            >
+              Login with OAuth2
+            </button>
+            <a
+              href="/login"
+              style={{
+                fontSize: "0.875rem",
+                color: "#3b82f6",
+                textDecoration: "none",
+              }}
+            >
+              Or go to login page
+            </a>
+          </>
         )}
 
         <p

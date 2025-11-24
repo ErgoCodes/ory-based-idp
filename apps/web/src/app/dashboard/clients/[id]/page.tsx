@@ -2,22 +2,30 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 import { Button } from "@workspace/ui/components/button"
 import { AuthGuard } from "@/components/auth-guard"
 import type { OAuth2Client } from "@/types/oauth-client.types"
 import { ArrowLeft, Trash2, Copy, CheckCircle } from "lucide-react"
+import { fetchWithAuth } from "@/lib/api/client"
 
 function ClientDetailsContent() {
+  const { data: session } = useSession()
   const router = useRouter()
   const params = useParams()
   const clientId = params.id as string
+
+  // Redirect if not superadmin
+  useEffect(() => {
+    if (session && session.user?.role !== "superadmin") {
+      router.push("/dashboard")
+    }
+  }, [session, router])
 
   const [client, setClient] = useState<OAuth2Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
     if (clientId) {
@@ -30,9 +38,13 @@ function ClientDetailsContent() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`${API_URL}/oauth2/clients/${clientId}`)
+      const response = await fetchWithAuth(`/oauth2/clients/${clientId}`)
 
       if (!response.ok) {
+        if (response.status === 401) {
+          signOut({ callbackUrl: "/login" })
+          return
+        }
         throw new Error("Failed to fetch client details")
       }
 
@@ -56,11 +68,15 @@ function ClientDetailsContent() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/oauth2/clients/${clientId}`, {
+      const response = await fetchWithAuth(`/oauth2/clients/${clientId}`, {
         method: "DELETE",
       })
 
       if (!response.ok) {
+        if (response.status === 401) {
+          signOut({ callbackUrl: "/login" })
+          return
+        }
         throw new Error("Failed to delete client")
       }
 

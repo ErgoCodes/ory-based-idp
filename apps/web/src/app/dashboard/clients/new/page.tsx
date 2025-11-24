@@ -1,13 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 import { Button } from "@workspace/ui/components/button"
 import { AuthGuard } from "@/components/auth-guard"
 import { ArrowLeft, Plus, X } from "lucide-react"
+import { fetchWithAuth } from "@/lib/api/client"
 
 function NewClientContent() {
+  const { data: session } = useSession()
   const router = useRouter()
+
+  // Redirect if not superadmin
+  useEffect(() => {
+    if (session && session.user?.role !== "superadmin") {
+      router.push("/dashboard")
+    }
+  }, [session, router])
+
   const [formData, setFormData] = useState({
     client_name: "",
     redirect_uris: [""],
@@ -19,8 +30,6 @@ function NewClientContent() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,15 +52,16 @@ function NewClientContent() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/oauth2/clients`, {
+      const response = await fetchWithAuth("/oauth2/clients", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(cleanedData),
       })
 
       if (!response.ok) {
+        if (response.status === 401) {
+          signOut({ callbackUrl: "/login" })
+          return
+        }
         const errorData = await response.json()
         throw new Error(errorData.message || "Failed to create client")
       }

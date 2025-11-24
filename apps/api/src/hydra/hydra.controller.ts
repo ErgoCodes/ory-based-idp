@@ -10,6 +10,7 @@ import {
   BadRequestException,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { HydraService } from './hydra.service';
 import { KratosService } from '../kratos/kratos.service';
@@ -25,6 +26,9 @@ import {
   CreateOAuth2Client,
 } from '@repo/api';
 import { ResponseMapper } from './mappers/response.mapper';
+import { Public } from '../common/decorators/public.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RolesGuard } from '../common/guards/roles.guard';
 
 @Controller('oauth2')
 export class HydraController {
@@ -36,6 +40,7 @@ export class HydraController {
   /**
    * GET /oauth2/login?login_challenge=xxx
    */
+  @Public()
   @Get('login')
   async getLoginRequest(@Query('login_challenge') challenge: string) {
     if (!challenge) {
@@ -53,6 +58,7 @@ export class HydraController {
   /**
    * POST /oauth2/login?login_challenge=xxx
    */
+  @Public()
   @Post('login')
   async handleLogin(
     @Query('login_challenge') challenge: string,
@@ -104,6 +110,7 @@ export class HydraController {
   /**
    * GET /oauth2/consent?consent_challenge=yyy
    */
+  @Public()
   @Get('consent')
   async getConsentRequest(@Query('consent_challenge') challenge: string) {
     if (!challenge) {
@@ -120,6 +127,7 @@ export class HydraController {
   /**
    * POST /oauth2/consent?consent_challenge=yyy
    */
+  @Public()
   @Post('consent')
   async handleConsent(
     @Query('consent_challenge') challenge: string,
@@ -216,6 +224,8 @@ export class HydraController {
    * POST /oauth2/clients
    */
   @Post('clients')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin')
   async createClient(
     @Body(new ZodValidationPipe(CreateOAuth2ClientSchema))
     clientData: CreateOAuth2Client,
@@ -236,6 +246,8 @@ export class HydraController {
    * GET /oauth2/clients
    */
   @Get('clients')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin')
   async listClients(
     @Query('pageSize') pageSize?: number,
     @Query('pageToken') pageToken?: string,
@@ -261,6 +273,8 @@ export class HydraController {
    * GET /oauth2/clients/:id
    */
   @Get('clients/:id')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin')
   async getClient(@Param('id') clientId: string) {
     if (!clientId) {
       throw new BadRequestException({
@@ -286,6 +300,8 @@ export class HydraController {
    * PUT /oauth2/clients/:id
    */
   @Put('clients/:id')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin')
   async updateClient(
     @Param('id') clientId: string,
     @Body(new ZodValidationPipe(CreateOAuth2ClientSchema))
@@ -318,6 +334,8 @@ export class HydraController {
    * DELETE /oauth2/clients/:id
    */
   @Delete('clients/:id')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteClient(@Param('id') clientId: string) {
     if (!clientId) {
@@ -342,6 +360,7 @@ export class HydraController {
   /**
    * GET /oauth2/logout?logout_challenge=zzz
    */
+  @Public()
   @Get('logout')
   async getLogoutRequest(@Query('logout_challenge') challenge: string) {
     if (!challenge) {
@@ -358,6 +377,7 @@ export class HydraController {
   /**
    * POST /oauth2/logout?logout_challenge=zzz
    */
+  @Public()
   @Post('logout')
   async handleLogout(@Query('logout_challenge') challenge: string) {
     if (!challenge) {

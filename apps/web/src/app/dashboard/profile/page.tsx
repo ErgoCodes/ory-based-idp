@@ -72,7 +72,6 @@ function ProfileContent() {
         email: data.traits.email,
       })
     } catch (err) {
-      console.error("Error fetching profile:", err)
       setError(err instanceof Error ? err.message : "Failed to load profile")
     } finally {
       setLoading(false)
@@ -108,7 +107,6 @@ function ProfileContent() {
       setEditMode(false)
       alert("Profile updated successfully!")
     } catch (err) {
-      console.error("Error updating profile:", err)
       setError(err instanceof Error ? err.message : "Failed to update profile")
     }
   }
@@ -142,7 +140,6 @@ function ProfileContent() {
       setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
       alert("Password changed successfully!")
     } catch (err) {
-      console.error("Error changing password:", err)
       setError(err instanceof Error ? err.message : "Failed to change password")
     }
   }

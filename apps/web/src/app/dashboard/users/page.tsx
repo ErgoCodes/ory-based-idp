@@ -61,7 +61,6 @@ function UsersContent() {
       const data = await response.json()
       setUsers(Array.isArray(data) ? data : [])
     } catch (err) {
-      console.error("Error fetching users:", err)
       setError(err instanceof Error ? err.message : "Failed to load users")
     } finally {
       setLoading(false)
@@ -91,8 +90,7 @@ function UsersContent() {
       // Refresh the list
       fetchUsers()
       alert("User deleted successfully")
-    } catch (err) {
-      console.error("Error deleting user:", err)
+    } catch {
       alert("Failed to delete user")
     }
   }

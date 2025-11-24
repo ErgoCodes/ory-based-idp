@@ -7,7 +7,7 @@ import { Button } from "@workspace/ui/components/button"
 import { AuthGuard } from "@/components/auth-guard"
 import { RoleBasedNav } from "@/components/role-based-nav"
 import type { OAuth2Client } from "@/types/oauth-client.types"
-import { Plus, Trash2, Edit, LogOut, User } from "lucide-react"
+import { Plus, Trash2, LogOut, User, Eye } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api/client"
 
 function DashboardContent() {
@@ -43,7 +43,6 @@ function DashboardContent() {
       // So data is already the array of clients
       setClients(Array.isArray(data) ? data : [])
     } catch (err) {
-      console.error("Error fetching clients:", err)
       setError(err instanceof Error ? err.message : "Failed to load clients")
     } finally {
       setLoading(false)
@@ -70,8 +69,7 @@ function DashboardContent() {
 
       // Refresh the list
       fetchClients()
-    } catch (err) {
-      console.error("Error deleting client:", err)
+    } catch {
       alert("Failed to delete client")
     }
   }
@@ -186,7 +184,7 @@ function DashboardContent() {
                           size="sm"
                           onClick={() => router.push(`/dashboard/clients/${client.client_id}`)}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"

@@ -39,8 +39,7 @@ function LoginForm() {
         router.push(callbackUrl)
         router.refresh()
       }
-    } catch (err) {
-      console.error("Login error:", err)
+    } catch {
       setError("An unexpected error occurred")
       setLoading(false)
     }

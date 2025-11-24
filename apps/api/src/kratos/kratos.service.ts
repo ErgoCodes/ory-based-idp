@@ -170,13 +170,8 @@ export class KratosService {
     password: string,
   ): Promise<Result<Identity, KratosError>> {
     try {
-      console.log('Creating native login flow...');
-      // Create a native login flow
       const loginFlow = await this.frontendApi.createNativeLoginFlow();
-      console.log('Login flow created:', loginFlow.id);
 
-      console.log('Submitting credentials to login flow...');
-      // Submit credentials to the login flow
       const result = await this.frontendApi.updateLoginFlow({
         flow: loginFlow.id,
         updateLoginFlowBody: {
@@ -186,15 +181,11 @@ export class KratosService {
         },
       });
 
-      console.log('Login flow result:', JSON.stringify(result, null, 2));
-
-      // Check if login was successful and return identity
       if (result.session?.identity) {
         const identity = KratosMapper.toIdentity(result.session.identity);
         return ResultUtils.ok(identity);
       }
 
-      // If no session, credentials are invalid
       return ResultUtils.err({
         code: 'invalid_credentials',
         message: 'Invalid email or password',
@@ -202,24 +193,6 @@ export class KratosService {
         statusCode: 401,
       });
     } catch (error) {
-      console.error('Error in verifyCredentials:', error);
-
-      // Try to read the response body if available
-      if (error && typeof error === 'object' && 'response' in error) {
-        const response = (error as any).response;
-        if (response && typeof response.json === 'function') {
-          try {
-            const errorBody = await response.json();
-            console.error(
-              'Kratos error response:',
-              JSON.stringify(errorBody, null, 2),
-            );
-          } catch (e) {
-            console.error('Could not parse error response');
-          }
-        }
-      }
-
       const kratosError = KratosErrorHandler.handle(
         error as never,
         'verify_credentials',
@@ -298,18 +271,11 @@ export class KratosService {
     newPassword: string,
   ): Promise<Result<{ success: boolean }, KratosError>> {
     try {
-      // Get the current identity
       const currentIdentity = await this.identityApi.getIdentity({
         id: identityId,
       });
 
-      console.log(
-        'Current identity:',
-        JSON.stringify(currentIdentity, null, 2),
-      );
-
-      // Try using updateIdentity with the correct structure
-      const updatedIdentity = await this.identityApi.updateIdentity({
+      await this.identityApi.updateIdentity({
         id: identityId,
         updateIdentityBody: {
           schema_id: currentIdentity.schema_id || 'default',
@@ -325,16 +291,12 @@ export class KratosService {
         },
       });
 
-      console.log('Password updated successfully for identity:', identityId);
       return ResultUtils.ok({ success: true });
     } catch (error) {
-      console.error('Password update error:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-
       const kratosError = KratosErrorHandler.handle(
         error as never,
         'update_password',
-        'Failed to update password. This may require using Kratos settings flow.',
+        'Failed to update password',
       );
       return ResultUtils.err(kratosError);
     }

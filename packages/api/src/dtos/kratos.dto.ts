@@ -1,8 +1,6 @@
 import { z } from "zod"
 
-// ============================================
 // Registration DTOs
-// ============================================
 
 export const RegisterUserSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -13,9 +11,7 @@ export const RegisterUserSchema = z.object({
 
 export type RegisterUser = z.infer<typeof RegisterUserSchema>
 
-// ============================================
 // Identity DTOs
-// ============================================
 
 export const IdentityTraitsSchema = z.object({
   email: z.string().email(),
@@ -40,9 +36,7 @@ export const kratosIdentitySchema = z.object({
 
 export type Identity = z.infer<typeof kratosIdentitySchema>
 
-// ============================================
 // Session DTOs
-// ============================================
 
 export const kratosSessionSchema = z.object({
   id: z.string(),
@@ -54,9 +48,7 @@ export const kratosSessionSchema = z.object({
 
 export type Session = z.infer<typeof kratosSessionSchema>
 
-// ============================================
 // Login DTOs (renamed to avoid conflict with Hydra)
-// ============================================
 
 export const KratosLoginCredentialsSchema = z.object({
   identifier: z.string().email("Invalid email format"),

@@ -51,7 +51,6 @@ function ClientDetailsContent() {
       const data = await response.json()
       setClient(data)
     } catch (err) {
-      console.error("Error fetching client:", err)
       setError(err instanceof Error ? err.message : "Failed to load client")
     } finally {
       setLoading(false)
@@ -81,8 +80,7 @@ function ClientDetailsContent() {
       }
 
       router.push("/dashboard")
-    } catch (err) {
-      console.error("Error deleting client:", err)
+    } catch {
       alert("Failed to delete client")
     }
   }
@@ -92,8 +90,8 @@ function ClientDetailsContent() {
       await navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error("Failed to copy:", err)
+    } catch {
+      // Silently fail
     }
   }
 

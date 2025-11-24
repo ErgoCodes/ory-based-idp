@@ -16,42 +16,37 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email and password are required")
         }
 
-        try {
-          // Call backend API to verify credentials
-          const response = await fetch(`${API_URL}/auth/login`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          })
+        // Call backend API to verify credentials
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password,
+          }),
+        })
 
-          if (!response.ok) {
-            const error = await response.json().catch(() => ({ message: "Invalid credentials" }))
-            throw new Error(error.message || "Invalid credentials")
-          }
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({ message: "Invalid credentials" }))
+          throw new Error(error.message || "Invalid credentials")
+        }
 
-          const data = await response.json()
+        const data = await response.json()
 
-          if (!data || !data.user || !data.access_token) {
-            throw new Error("Invalid user data")
-          }
+        if (!data || !data.user || !data.access_token) {
+          throw new Error("Invalid user data")
+        }
 
-          return {
-            id: data.user.id,
-            email: data.user.traits.email,
-            name: data.user.traits.name
-              ? `${data.user.traits.name.first} ${data.user.traits.name.last}`.trim()
-              : null,
-            role: data.user.traits.role || "user",
-            accessToken: data.access_token,
-          }
-        } catch (error) {
-          console.error("Auth error:", error)
-          throw error
+        return {
+          id: data.user.id,
+          email: data.user.traits.email,
+          name: data.user.traits.name
+            ? `${data.user.traits.name.first} ${data.user.traits.name.last}`.trim()
+            : null,
+          role: data.user.traits.role || "user",
+          accessToken: data.access_token,
         }
       },
     }),

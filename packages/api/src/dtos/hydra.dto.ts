@@ -1,8 +1,6 @@
 import { z } from "zod"
 
-// ============================================
 // Login DTOs
-// ============================================
 
 export const LoginRequestInfoSchema = z.object({
   challenge: z.string(),
@@ -48,9 +46,7 @@ export const AcceptLoginRequestSchema = z.object({
 
 export type AcceptLoginRequest = z.infer<typeof AcceptLoginRequestSchema>
 
-// ============================================
 // Consent DTOs
-// ============================================
 
 export const ConsentRequestInfoSchema = z.object({
   challenge: z.string(),
@@ -90,9 +86,7 @@ export const AcceptConsentRequestSchema = z.object({
 
 export type AcceptConsentRequest = z.infer<typeof AcceptConsentRequestSchema>
 
-// ============================================
 // Common DTOs
-// ============================================
 
 export const RedirectResponseSchema = z.object({
   redirect_to: z.string(),
@@ -100,9 +94,7 @@ export const RedirectResponseSchema = z.object({
 
 export type RedirectResponse = z.infer<typeof RedirectResponseSchema>
 
-// ============================================
 // OAuth2 Client DTOs
-// ============================================
 
 export const CreateOAuth2ClientSchema = z.object({
   client_name: z.string().min(1, "Client name is required"),

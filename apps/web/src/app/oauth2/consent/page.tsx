@@ -55,15 +55,13 @@ function ConsentPageContent() {
         // If Hydra says we can skip consent (user already consented before),
         // automatically accept it without showing the UI
         if (data.skip) {
-          console.log("Consent can be skipped, auto-accepting...")
           await autoAcceptConsent(consentChallenge, apiUrl)
           return
         }
 
         setConsentRequest(data)
         setLoading(false)
-      } catch (err) {
-        console.error("Failed to fetch consent request:", err)
+      } catch {
         setError("Failed to connect to authentication server")
         setLoading(false)
       }
@@ -113,8 +111,7 @@ function ConsentPageContent() {
         setError("Invalid response from server")
         setSubmitting(false)
       }
-    } catch (err) {
-      console.error("Failed to submit consent:", err)
+    } catch {
       setError("Failed to connect to authentication server")
       setSubmitting(false)
     }
@@ -242,6 +239,19 @@ function ConsentPageContent() {
  */
 async function autoAcceptConsent(consentChallenge: string, apiUrl: string) {
   try {
+    // First, fetch the consent request to get the requested scopes
+    const getResponse = await fetch(
+      `${apiUrl}/oauth2/consent?consent_challenge=${consentChallenge}`,
+    )
+
+    if (!getResponse.ok) {
+      globalThis.location.reload()
+      return
+    }
+
+    const consentData: ConsentRequestInfo = await getResponse.json()
+
+    // Now accept with the requested scopes
     const response = await fetch(`${apiUrl}/oauth2/consent?consent_challenge=${consentChallenge}`, {
       method: "POST",
       headers: {
@@ -249,6 +259,7 @@ async function autoAcceptConsent(consentChallenge: string, apiUrl: string) {
       },
       body: JSON.stringify({
         grant: true,
+        grant_scope: consentData.requested_scope, // Include the requested scopes
         remember: false, // Don't need to remember again, it's already remembered
       }),
     })
@@ -256,16 +267,11 @@ async function autoAcceptConsent(consentChallenge: string, apiUrl: string) {
     const data = await response.json()
 
     if (response.ok && data.redirect_to) {
-      // Redirect back to the OAuth2 client
       globalThis.location.href = data.redirect_to
     } else {
-      console.error("Failed to auto-accept consent:", data)
-      // If auto-accept fails, reload the page to show the consent form
       globalThis.location.reload()
     }
-  } catch (error) {
-    console.error("Error auto-accepting consent:", error)
-    // If auto-accept fails, reload the page to show the consent form
+  } catch {
     globalThis.location.reload()
   }
 }

@@ -29,8 +29,8 @@ function ClientSuccessContent() {
       setTimeout(() => {
         setCopied({ ...copied, [key]: false })
       }, 2000)
-    } catch (err) {
-      console.error("Failed to copy:", err)
+    } catch {
+      // Silently fail
     }
   }
 

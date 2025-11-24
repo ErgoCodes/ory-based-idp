@@ -42,7 +42,6 @@ function LogoutContent() {
         setLoading(false)
       }
     } catch (err) {
-      console.error("Logout error:", err)
       setError(err instanceof Error ? err.message : "An error occurred")
       setLoading(false)
     }

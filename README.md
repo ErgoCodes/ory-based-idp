@@ -1,321 +1,582 @@
-# OAuth2 Identity Provider with RBAC
+# Ory-Based Identity Provider
 
-Prototipo de Identity Provider basado en Ory Kratos y Hydra. Incluye autenticación, emisión de tokens OAuth2, control de acceso basado en roles (RBAC), API NestJS para usuarios y roles, y panel administrativo en Next.js.
+> Enterprise-grade, open-source Identity Provider built with Ory Kratos and Ory Hydra
 
-## Características
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-10.0-red)](https://nestjs.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.0-black)](https://nextjs.org/)
 
-- **Autenticación de usuarios** con Ory Kratos
-- **OAuth2/OIDC** con Ory Hydra
-- **Control de acceso basado en roles (RBAC)**
-  - Rol de Superadmin con acceso completo
-  - Rol de Usuario con acceso limitado
-- **Gestión de clientes OAuth2** (solo superadmin)
-- **Gestión de usuarios** (solo superadmin)
-- **Gestión de perfil** (todos los usuarios)
-- **Cambio de contraseña** (todos los usuarios)
-- **JWT tokens** con claims de rol para autorización
+## 🎯 Project Description
 
-## Arquitectura
+**Ory-Based Identity Provider** is a complete, production-ready authentication and authorization solution that combines the power of Ory Kratos (identity management) and Ory Hydra (OAuth2/OIDC server) with a modern tech stack. This project provides an open-source alternative to commercial solutions like Auth0, Okta, or AWS Cognito.
+
+### Problem Solved
+
+Organizations need secure, scalable authentication systems but face:
+
+- High costs of commercial identity providers ($$$)
+- Vendor lock-in and limited customization
+- Complex integration with existing systems
+- Lack of control over user data
+
+### Solution
+
+A self-hosted, fully customizable identity provider that offers:
+
+- ✅ Complete OAuth2/OIDC compliance
+- ✅ Role-Based Access Control (RBAC) out of the box
+- ✅ Modern admin dashboard for user and client management
+- ✅ Production-ready architecture
+- ✅ Zero licensing costs
+- ✅ Full data ownership
+
+### Value Proposition
+
+**For Companies:**
+
+- **Cost Savings**: Eliminate monthly fees (Auth0 starts at $240/month)
+- **Reusability**: Use across multiple projects and microservices
+- **Customization**: Adapt to specific business needs
+- **Compliance**: Keep sensitive data in-house
+
+**For Developers:**
+
+- **Modern Stack**: TypeScript, NestJS, Next.js, Docker
+- **Best Practices**: Clean architecture, type safety, validation
+- **Documentation**: Comprehensive guides and examples
+- **Extensibility**: Easy to add features and integrations
+
+## 👥 Team Members
+
+- Falta por poner
+
+## ✨ Key Features
+
+### 🔐 Authentication & Identity Management
+
+- User registration and login
+- Password management (change, reset)
+- Session management with "remember me"
+- Email verification ready
+- Profile management
+
+### 🎫 OAuth2/OIDC Authorization Server
+
+- Full OAuth2 Authorization Code Flow
+- Refresh tokens support
+- Consent management with "remember" option
+- Multiple OAuth2 clients support
+- Scopes: `openid`, `email`, `profile`, `offline_access`
+
+### 👑 Role-Based Access Control (RBAC)
+
+- **Superadmin Role**: Full system access
+  - Manage OAuth2 clients (CRUD)
+  - Manage users (view, edit, delete)
+  - Assign/change user roles
+- **User Role**: Limited access
+  - View and edit own profile
+  - Change own password
+
+### 🎨 Admin Dashboard
+
+- Modern, responsive UI built with Next.js and Tailwind CSS
+- Role-based navigation
+- OAuth2 client management interface
+- User management interface
+- Real-time updates
+
+### 🔧 Developer Experience
+
+- Monorepo architecture with Turborepo
+- Shared TypeScript types and DTOs
+- Docker Compose for easy local development
+- Comprehensive API documentation (Swagger)
+- Type-safe API client
+
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend (Next.js)                        │
-│  - Dashboard con navegación basada en roles                 │
-│  - Gestión de perfil                                        │
-│  - Gestión de usuarios (superadmin)                         │
-│  - Gestión de clientes OAuth2 (superadmin)                  │
-└────────────────────────┬────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     Client Applications                          │
+│  (Web Apps, Mobile Apps, Third-party Services)                  │
+└────────────────────────┬────────────────────────────────────────┘
                          │
-                         │ HTTP + JWT (con claim de rol)
+                         │ OAuth2/OIDC Flow
                          ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    Backend API (NestJS)                      │
-│  - AuthGuard: Valida JWT tokens                            │
-│  - RolesGuard: Verifica permisos por rol                   │
-│  - UserController: Gestión de perfil                       │
-│  - AdminController: Gestión de usuarios                    │
-│  - HydraController: Gestión de clientes OAuth2             │
-└────────────────────────┬────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                  Admin Dashboard (Next.js)                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │   Profile    │  │    Users     │  │   Clients    │         │
+│  │  Management  │  │  Management  │  │  Management  │         │
+│  └──────────────┘  └──────────────┘  └──────────────┘         │
+└────────────────────────┬────────────────────────────────────────┘
                          │
+                         │ REST API + JWT
                          ↓
-┌─────────────────────────────────────────────────────────────┐
-│              Ory Kratos (Identity Management)                │
-│  - Almacena identidades con trait de rol                   │
-│  - Maneja autenticación de usuarios                        │
-└─────────────────────────────────────────────────────────────┘
-                         │
-                         ↓
-┌─────────────────────────────────────────────────────────────┐
-│              Ory Hydra (OAuth2/OIDC Server)                  │
-│  - Emite access tokens y refresh tokens                    │
-│  - Gestiona flujos OAuth2                                  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    Backend API (NestJS)                          │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Controllers: Auth, Users, Admin, OAuth2 Flow/Clients   │  │
+│  ├──────────────────────────────────────────────────────────┤  │
+│  │  Guards: AuthGuard (JWT), RolesGuard (RBAC)             │  │
+│  ├──────────────────────────────────────────────────────────┤  │
+│  │  Services: Kratos, Hydra, JWT, Init                     │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────┬───────────────────┬────────────────────┘
+                         │                   │
+                         ↓                   ↓
+┌────────────────────────────────┐  ┌──────────────────────────┐
+│   Ory Kratos (Identity Mgmt)   │  │  Ory Hydra (OAuth2/OIDC) │
+│  - User identities              │  │  - Access tokens         │
+│  - Authentication               │  │  - Refresh tokens        │
+│  - Password management          │  │  - Client management     │
+│  - User traits (with roles)     │  │  - Consent management    │
+└────────────────┬───────────────┘  └──────────┬───────────────┘
+                 │                              │
+                 └──────────────┬───────────────┘
+                                ↓
+                    ┌───────────────────────┐
+                    │  PostgreSQL Database  │
+                    │  - Identities         │
+                    │  - OAuth2 clients     │
+                    │  - Sessions           │
+                    └───────────────────────┘
 ```
 
-## Sistema de Roles
+### Technology Stack
 
-### Superadmin
+**Backend:**
 
-- Gestionar clientes OAuth2 (crear, ver, editar, eliminar)
-- Gestionar usuarios (ver, editar roles, eliminar)
-- Ver y editar su propio perfil
-- Cambiar su contraseña
+- NestJS 10 (Node.js framework)
+- TypeScript 5
+- Ory Kratos SDK (identity management)
+- Ory Hydra SDK (OAuth2/OIDC)
+- Zod (validation)
+- JWT (authentication)
 
-### Usuario Regular
+**Frontend:**
 
-- Ver su propio perfil
-- Editar su nombre y email
-- Cambiar su contraseña
+- Next.js 15 (React framework)
+- NextAuth.js (authentication)
+- Tailwind CSS (styling)
+- TypeScript 5
 
-## Configuración
+**Infrastructure:**
 
-### Variables de Entorno
+- Docker & Docker Compose
+- PostgreSQL (database)
+- Ory Kratos (identity provider)
+- Ory Hydra (OAuth2 server)
 
-#### Backend API (`apps/api/.env`)
+**DevOps:**
+
+- Turborepo (monorepo management)
+- pnpm (package manager)
+- ESLint & Prettier (code quality)
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Docker** and **Docker Compose** (for Ory services and PostgreSQL)
+- **Node.js** 18+ and **pnpm** (for applications)
+- **Git** (to clone the repository)
+
+### Installation
+
+1. **Clone the repository**
 
 ```bash
-# Ory Kratos
-KRATOS_PUBLIC_URL=http://localhost:4433
-KRATOS_ADMIN_URL=http://localhost:4434
-
-# Ory Hydra
-HYDRA_ADMIN_URL=http://localhost:4445
-HYDRA_PUBLIC_URL=http://localhost:4444
-
-# JWT Configuration
-JWT_SECRET=your-secret-key-change-in-production
-JWT_EXPIRES_IN=24h
-
-# Default Superadmin (se crea automáticamente al iniciar)
-SUPERADMIN_EMAIL=admin@example.com
-SUPERADMIN_PASSWORD=changeme123
-
-# API
-PORT=3000
-NODE_ENV=development
-```
-
-#### Frontend (`apps/web/.env.local`)
-
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXTAUTH_URL=http://localhost:3001
-NEXTAUTH_SECRET=your-nextauth-secret-key
-```
-
-### Instalación
-
-1. **Clonar el repositorio**
-
-```bash
-git clone <repository-url>
+git clone https://github.com/yourusername/ory-based-idp.git
 cd ory-based-idp
 ```
 
-2. **Instalar dependencias**
+2. **Install dependencies**
 
 ```bash
 pnpm install
 ```
 
-3. **Configurar variables de entorno**
-
-```bash
-# Backend
-cp apps/api/.env.example apps/api/.env
-# Editar apps/api/.env con tus valores
-
-# Frontend
-cp apps/web/.env.local.example apps/web/.env.local
-# Editar apps/web/.env.local con tus valores
-```
-
-4. **Iniciar servicios de Ory con Docker**
+3. **Start Ory services with Docker**
 
 ```bash
 docker-compose -f docker/quickstart.yml up -d
 ```
 
-5. **Iniciar el backend**
+This will start:
+
+- Ory Kratos (ports 4433, 4434)
+- Ory Hydra (ports 4444, 4445)
+- PostgreSQL (port 5432)
+
+4. **Configure environment variables**
+
+```bash
+# Backend API
+cp apps/api/.env.example apps/api/.env
+
+# Admin Dashboard
+cp apps/web/.env.local.example apps/web/.env.local
+
+# OAuth2 Demo Client (optional)
+cp apps/client-oauth2-demo/.env.local.example apps/client-oauth2-demo/.env.local
+```
+
+5. **Start the backend API**
 
 ```bash
 cd apps/api
 pnpm run dev
 ```
 
-6. **Iniciar el frontend**
+The API will be available at `http://localhost:3000`
+
+6. **Start the admin dashboard**
 
 ```bash
 cd apps/web
 pnpm run dev
 ```
 
-## Uso
+The dashboard will be available at `http://localhost:3001`
 
-### Acceso Inicial
+7. **(Optional) Start the OAuth2 demo client**
 
-1. El sistema crea automáticamente un superadmin al iniciar:
-   - Email: `admin@example.com` (configurable)
-   - Password: `changeme123` (configurable)
-
-2. Accede al dashboard en `http://localhost:3001`
-
-3. **IMPORTANTE**: Cambia la contraseña del superadmin inmediatamente después del primer login
-
-### Endpoints del API
-
-#### Autenticación (Público)
-
-- `POST /auth/login` - Login de usuarios
-- `POST /auth/registration` - Registro de nuevos usuarios (rol "user" por defecto)
-
-#### Gestión de Perfil (Autenticado)
-
-- `GET /users/me` - Obtener perfil del usuario actual
-- `PATCH /users/me` - Actualizar perfil (nombre, email)
-- `POST /users/me/password` - Cambiar contraseña
-
-#### Gestión de Usuarios (Solo Superadmin)
-
-- `GET /admin/users` - Listar todos los usuarios
-- `GET /admin/users/:id` - Ver detalles de un usuario
-- `PATCH /admin/users/:id` - Actualizar usuario (incluye cambio de rol)
-- `DELETE /admin/users/:id` - Eliminar usuario
-
-#### Gestión de Clientes OAuth2 (Solo Superadmin)
-
-- `GET /oauth2/clients` - Listar clientes
-- `POST /oauth2/clients` - Crear cliente
-- `GET /oauth2/clients/:id` - Ver detalles de cliente
-- `PUT /oauth2/clients/:id` - Actualizar cliente
-- `DELETE /oauth2/clients/:id` - Eliminar cliente
-
-#### Flujos OAuth2 (Público)
-
-- `GET /oauth2/login` - Página de login OAuth2
-- `POST /oauth2/login` - Procesar login OAuth2
-- `GET /oauth2/consent` - Página de consentimiento
-- `POST /oauth2/consent` - Procesar consentimiento
-- `POST /oauth2/logout` - Logout OAuth2
-
-## Seguridad
-
-### JWT Tokens
-
-- Los tokens JWT incluyen el rol del usuario en el payload
-- Los tokens son firmados con `JWT_SECRET`
-- Expiración configurable (por defecto 24 horas)
-
-### Autorización
-
-- **AuthGuard**: Valida que el token JWT sea válido
-- **RolesGuard**: Verifica que el usuario tenga el rol requerido
-- Los endpoints protegidos usan el decorador `@Roles('superadmin')` o `@Roles('user', 'superadmin')`
-
-### Contraseñas
-
-- Gestionadas por Kratos con bcrypt
-- Mínimo 8 caracteres
-- Cambio de contraseña requiere contraseña actual
-
-### Recomendaciones de Producción
-
-1. Cambiar `JWT_SECRET` a un valor seguro (mínimo 256 bits)
-2. Cambiar `NEXTAUTH_SECRET` a un valor seguro
-3. Cambiar credenciales del superadmin por defecto
-4. Usar HTTPS en producción
-5. Configurar CORS apropiadamente
-6. Implementar rate limiting
-7. Habilitar logs de auditoría para acciones de superadmin
-
-## Desarrollo
-
-### Estructura del Proyecto
-
-```
-.
-├── apps/
-│   ├── api/                    # Backend NestJS
-│   │   ├── src/
-│   │   │   ├── auth/          # Autenticación
-│   │   │   ├── users/         # Gestión de perfil
-│   │   │   ├── admin/         # Gestión de usuarios (superadmin)
-│   │   │   ├── hydra/         # Integración con Hydra
-│   │   │   ├── kratos/        # Integración con Kratos
-│   │   │   └── common/
-│   │   │       ├── guards/    # AuthGuard, RolesGuard
-│   │   │       ├── decorators/# @Roles(), @Public()
-│   │   │       └── services/  # JwtService, InitService
-│   │   └── ...
-│   └── web/                    # Frontend Next.js
-│       ├── src/
-│       │   ├── app/
-│       │   │   ├── dashboard/
-│       │   │   │   ├── page.tsx           # Dashboard principal
-│       │   │   │   ├── profile/           # Gestión de perfil
-│       │   │   │   ├── users/             # Gestión de usuarios
-│       │   │   │   └── clients/           # Gestión de clientes OAuth2
-│       │   │   ├── login/                 # Login
-│       │   │   └── oauth2/                # Flujos OAuth2
-│       │   ├── components/
-│       │   │   ├── auth-guard.tsx         # Protección de rutas
-│       │   │   └── role-based-nav.tsx     # Navegación por rol
-│       │   └── lib/
-│       │       ├── api/client.ts          # Cliente HTTP con auth
-│       │       └── auth/auth-config.ts    # Configuración NextAuth
-│       └── ...
-├── packages/
-│   └── api/                    # DTOs compartidos
-├── docker/
-│   ├── config/
-│   │   ├── kratos.yml         # Configuración de Kratos
-│   │   └── identity.schema.json # Schema con rol
-│   └── quickstart.yml         # Docker Compose
-└── ...
+```bash
+cd apps/client-oauth2-demo
+pnpm run dev
 ```
 
-### Agregar Nuevos Roles
+The demo client will be available at `http://localhost:8363`
 
-Para agregar nuevos roles al sistema:
+### First Login
 
-1. Actualizar el schema de Kratos (`docker/config/identity.schema.json`):
+The system automatically creates a default superadmin account:
 
-```json
-{
-  "role": {
-    "type": "string",
-    "enum": ["user", "superadmin", "moderator"],
-    "default": "user"
-  }
+- **Email**: `admin@example.com`
+- **Password**: `admin123`
+
+⚠️ **IMPORTANT**: Change the password immediately after first login!
+
+## 📖 Usage Guide
+
+### For Administrators
+
+#### 1. Managing Users
+
+1. Login to the admin dashboard at `http://localhost:3001`
+2. Navigate to **Users** in the sidebar
+3. View all registered users
+4. Click on a user to:
+   - Edit their profile (name, email)
+   - Change their role (user ↔ superadmin)
+   - Delete the user
+
+#### 2. Managing OAuth2 Clients
+
+1. Navigate to **OAuth2 Clients** in the sidebar
+2. Click **Create New Client**
+3. Fill in the client details:
+   - Client name
+   - Redirect URIs (where to redirect after auth)
+   - Grant types (authorization_code, refresh_token)
+   - Scopes (openid, email, profile, offline_access)
+4. Save and copy the **Client ID** and **Client Secret**
+5. Use these credentials in your application
+
+#### 3. Managing Your Profile
+
+1. Navigate to **Profile** in the sidebar
+2. Update your name and email
+3. Change your password (requires current password)
+
+### For Developers
+
+#### Integrating with Your Application
+
+1. **Create an OAuth2 client** in the admin dashboard
+
+2. **Configure your application** with the client credentials:
+
+```typescript
+// Example with NextAuth.js
+import { OAuthConfig } from "next-auth/providers"
+
+export const HydraProvider: OAuthConfig<any> = {
+  id: "hydra",
+  name: "Hydra",
+  type: "oauth",
+  authorization: {
+    url: "http://localhost:4444/oauth2/auth",
+    params: { scope: "openid email profile offline_access" },
+  },
+  token: "http://localhost:4444/oauth2/token",
+  userinfo: "http://localhost:4444/userinfo",
+  clientId: process.env.OAUTH2_CLIENT_ID,
+  clientSecret: process.env.OAUTH2_CLIENT_SECRET,
 }
 ```
 
-2. Actualizar los tipos en `packages/api/src/dtos/kratos.dto.ts`
+3. **Implement the OAuth2 flow** in your application (see `apps/client-oauth2-demo` for a complete example)
 
-3. Actualizar los tipos en el frontend (`apps/web/src/types/next-auth.d.ts`)
+#### API Endpoints
 
-4. Agregar guards y decoradores según sea necesario
+**Authentication (Public)**
 
-## Troubleshooting
+- `POST /auth/login` - User login
+- `POST /auth/registration` - User registration
 
-### El superadmin no se crea automáticamente
+**Profile Management (Authenticated)**
 
-- Verifica que las variables `SUPERADMIN_EMAIL` y `SUPERADMIN_PASSWORD` estén configuradas
-- Revisa los logs del backend para ver errores de Kratos
-- Asegúrate de que Kratos esté corriendo y accesible
+- `GET /users/me` - Get current user profile
+- `PATCH /users/me` - Update profile
+- `POST /users/me/password` - Change password
 
-### Error 403 al acceder a endpoints protegidos
+**User Management (Superadmin only)**
 
-- Verifica que el token JWT incluya el claim de rol
-- Revisa que el usuario tenga el rol correcto
-- Verifica que el endpoint tenga el decorador `@Roles()` correcto
+- `GET /admin/users` - List all users
+- `GET /admin/users/:id` - Get user details
+- `PATCH /admin/users/:id` - Update user (including role)
+- `DELETE /admin/users/:id` - Delete user
 
-### Error 401 en peticiones al API
+**OAuth2 Client Management (Superadmin only)**
 
-- Verifica que el token JWT sea válido y no haya expirado
-- Asegúrate de que el frontend esté enviando el header `Authorization: Bearer <token>`
-- Verifica que `JWT_SECRET` sea el mismo en backend y que no haya cambiado
+- `GET /oauth2/clients` - List OAuth2 clients
+- `POST /oauth2/clients` - Create OAuth2 client
+- `GET /oauth2/clients/:id` - Get client details
+- `PUT /oauth2/clients/:id` - Update client
+- `DELETE /oauth2/clients/:id` - Delete client
 
-## Licencia
+**OAuth2 Flow (Public)**
 
-[Tu licencia aquí]
+- `GET /oauth2/login` - OAuth2 login page
+- `POST /oauth2/login` - Process login
+- `GET /oauth2/consent` - OAuth2 consent page
+- `POST /oauth2/consent` - Process consent
+- `POST /oauth2/logout` - OAuth2 logout
+
+Full API documentation available at `http://localhost:3000/api` (Swagger UI)
+
+## 🔒 Security
+
+### Authentication
+
+- Passwords hashed with bcrypt (managed by Kratos)
+- JWT tokens for API authentication
+- Secure session management
+- CSRF protection
+
+### Authorization
+
+- Role-Based Access Control (RBAC)
+- JWT tokens include role claims
+- Guards protect sensitive endpoints
+- Principle of least privilege
+
+### OAuth2 Security
+
+- Authorization Code Flow (most secure)
+- Refresh token rotation
+- Consent management
+- Redirect URI validation
+
+### Production Recommendations
+
+1. **Change default credentials**
+   - Update `SUPERADMIN_EMAIL` and `SUPERADMIN_PASSWORD`
+   - Use strong, unique passwords
+
+2. **Secure secrets**
+   - Generate strong `JWT_SECRET` (256+ bits)
+   - Generate strong `NEXTAUTH_SECRET`
+   - Never commit secrets to version control
+
+3. **Enable HTTPS**
+   - Use TLS certificates in production
+   - Configure secure cookies
+
+4. **Configure CORS**
+   - Whitelist only trusted origins
+   - Restrict allowed methods
+
+5. **Add rate limiting**
+   - Protect against brute force attacks
+   - Limit API requests per IP
+
+6. **Enable audit logging**
+   - Log all admin actions
+   - Monitor suspicious activity
+
+## 📁 Project Structure
+
+```
+ory-based-idp/
+├── apps/
+│   ├── api/                          # Backend NestJS API
+│   │   ├── src/
+│   │   │   ├── auth/                 # Authentication module
+│   │   │   ├── users/                # User profile management
+│   │   │   ├── admin/                # Admin user management
+│   │   │   ├── hydra/                # OAuth2 flow & clients
+│   │   │   │   ├── oauth2-flow.controller.ts
+│   │   │   │   ├── oauth2-flow.service.ts
+│   │   │   │   ├── oauth2-clients.controller.ts
+│   │   │   │   └── oauth2-clients.service.ts
+│   │   │   ├── kratos/               # Kratos integration
+│   │   │   └── common/
+│   │   │       ├── guards/           # AuthGuard, RolesGuard
+│   │   │       ├── decorators/       # @Roles(), @Public()
+│   │   │       └── services/         # JWT, Init services
+│   │   └── ...
+│   ├── web/                          # Admin Dashboard (Next.js)
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   │   ├── dashboard/        # Dashboard pages
+│   │   │   │   │   ├── page.tsx      # Main dashboard
+│   │   │   │   │   ├── profile/      # Profile management
+│   │   │   │   │   ├── users/        # User management
+│   │   │   │   │   └── clients/      # OAuth2 client management
+│   │   │   │   ├── login/            # Login page
+│   │   │   │   ├── register/         # Registration page
+│   │   │   │   └── oauth2/           # OAuth2 flow pages
+│   │   │   ├── components/
+│   │   │   │   ├── auth-guard.tsx    # Route protection
+│   │   │   │   └── role-based-nav.tsx # Role-based navigation
+│   │   │   └── lib/
+│   │   │       ├── api/client.ts     # HTTP client with auth
+│   │   │       └── auth/             # NextAuth configuration
+│   │   └── ...
+│   └── client-oauth2-demo/           # OAuth2 Demo Client
+│       └── ...
+├── packages/
+│   └── api/                          # Shared TypeScript types
+│       └── src/
+│           └── dtos/                 # Data Transfer Objects
+├── docker/
+│   ├── config/
+│   │   ├── kratos.yml                # Kratos configuration
+│   │   └── identity.schema.json     # Identity schema with roles
+│   └── quickstart.yml                # Docker Compose file
+├── .kiro/
+│   └── specs/                        # Project specifications
+│       └── rbac-user-management/
+├── LICENSE                           # MIT License
+└── README.md                         # This file
+```
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# Unit tests
+pnpm test
+
+# E2E tests
+pnpm test:e2e
+
+# Test coverage
+pnpm test:cov
+```
+
+### Manual Testing
+
+1. **Test OAuth2 Flow**
+   - Start all services
+   - Navigate to `http://localhost:8363` (demo client)
+   - Click "Sign in with OAuth2"
+   - Complete the authorization flow
+   - Verify you're redirected back with user info
+
+2. **Test RBAC**
+   - Login as superadmin
+   - Verify access to Users and Clients pages
+   - Create a regular user
+   - Login as regular user
+   - Verify restricted access (no Users/Clients pages)
+
+## 🚢 Deployment
+
+### Docker Production Build
+
+```bash
+# Build production images
+docker-compose -f docker/production.yml build
+
+# Start services
+docker-compose -f docker/production.yml up -d
+```
+
+### Environment Variables for Production
+
+```bash
+# Backend
+JWT_SECRET=<strong-random-secret-256-bits>
+SUPERADMIN_EMAIL=admin@yourdomain.com
+SUPERADMIN_PASSWORD=<strong-password>
+NODE_ENV=production
+
+# Frontend
+NEXTAUTH_SECRET=<strong-random-secret>
+NEXTAUTH_URL=https://yourdomain.com
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+```
+
+### Deployment Checklist
+
+- [ ] Update all environment variables
+- [ ] Change default superadmin credentials
+- [ ] Enable HTTPS/TLS
+- [ ] Configure CORS for production domains
+- [ ] Set up database backups
+- [ ] Configure logging and monitoring
+- [ ] Set up rate limiting
+- [ ] Review security headers
+- [ ] Test OAuth2 flow end-to-end
+- [ ] Document deployment process
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Style
+
+- Follow TypeScript best practices
+- Use ESLint and Prettier configurations
+- Write meaningful commit messages
+- Add tests for new features
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Ory** for providing excellent open-source identity solutions
+- **NestJS** and **Next.js** communities for amazing frameworks
+- **Yarey Tech** for organizing the hackathon and supporting open-source development
+
+## 📞 Support
+
+For questions, issues, or feature requests:
+
+- Open an issue on GitHub
+- Contact: [your-email@example.com]
+
+## 🎥 Demo
+
+[Link to video demo - Coming soon]
+
+---
+
+**Built with ❤️ for the Yarey Tech Hackathon**

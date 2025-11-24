@@ -81,7 +81,6 @@ function NewClientContent() {
 
       router.push(`/dashboard/clients/success?${params.toString()}`)
     } catch (err) {
-      console.error("Error creating client:", err)
       setError(err instanceof Error ? err.message : "Failed to create client")
       setLoading(false)
     }

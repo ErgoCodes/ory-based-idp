@@ -14,7 +14,6 @@ interface FetchOptions extends RequestInit {
 export async function fetchWithAuth(endpoint: string, options: FetchOptions = {}) {
   const { token, ...fetchOptions } = options
 
-  // Get token from session if not provided
   let accessToken = token
   if (!accessToken) {
     const session = await getSession()
@@ -25,7 +24,6 @@ export async function fetchWithAuth(endpoint: string, options: FetchOptions = {}
     "Content-Type": "application/json",
   }
 
-  // Merge existing headers
   if (fetchOptions.headers) {
     const existingHeaders = new Headers(fetchOptions.headers)
     existingHeaders.forEach((value, key) => {
@@ -33,7 +31,6 @@ export async function fetchWithAuth(endpoint: string, options: FetchOptions = {}
     })
   }
 
-  // Add Authorization header if token exists
   if (accessToken) {
     headers["Authorization"] = `Bearer ${accessToken}`
   }

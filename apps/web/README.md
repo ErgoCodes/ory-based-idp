@@ -1,234 +1,282 @@
-# OAuth2 Identity Provider - Admin Dashboard
+# Admin Dashboard
 
-This application provides an admin dashboard for managing OAuth2 clients and serves as the Login/Consent Provider for Ory Hydra.
+> Modern admin dashboard for managing users and OAuth2 clients
+
+## Overview
+
+This is the administrative interface for the Ory-Based Identity Provider. It provides a clean, intuitive UI for managing users, OAuth2 clients, and personal profiles with role-based access control.
 
 ## Features
 
-### 🔐 Authentication
+### For All Users
 
-- Admin login with email/password
-- User registration
-- Session management with NextAuth.js
-- Protected routes
+- **Profile Management**: View and edit personal information
+- **Password Change**: Secure password update with current password verification
+- **Session Management**: Secure authentication with NextAuth.js
 
-### 📊 OAuth2 Client Management
+### For Superadmins
 
-- View all registered OAuth2 clients
-- Create new OAuth2 clients
-- Edit existing clients
-- Delete clients
-- View client details (client_id, redirect_uris, scopes, etc.)
+- **User Management**:
+  - View all registered users
+  - Edit user profiles (name, email)
+  - Change user roles
+  - Delete users
+- **OAuth2 Client Management**:
+  - Create new OAuth2 clients
+  - View client details and credentials
+  - Update client configuration
+  - Delete clients
+- **Role-Based Navigation**: Dynamic sidebar based on user permissions
 
-### 🎨 UI/UX
+## Technology Stack
 
-- Modern, responsive design with shadcn/ui
-- Dark/Light theme support
-- Clean and intuitive interface
+- **Framework**: Next.js 15 (App Router)
+- **Authentication**: NextAuth.js
+- **Styling**: Tailwind CSS
+- **UI Components**: Custom components with Tailwind
+- **Type Safety**: TypeScript
+- **HTTP Client**: Fetch API with authentication wrapper
 
 ## Getting Started
 
 ### Prerequisites
 
-1. Backend API running on `http://localhost:3000`
-2. Ory Hydra running on `http://localhost:4444`
-3. Ory Kratos running (for user management)
-
-### Environment Variables
-
-Create a `.env.local` file with:
-
-```bash
-# Backend API URL
-NEXT_PUBLIC_API_URL=http://localhost:3000
-
-# NextAuth Configuration
-NEXTAUTH_URL=http://localhost:8362
-NEXTAUTH_SECRET=your-secret-key-here
-
-# Generate secret with: openssl rand -base64 32
-```
+- Node.js 18+
+- pnpm
+- Backend API running on `http://localhost:3000`
 
 ### Installation
 
-```bash
-# Install dependencies
-pnpm install
+1. Install dependencies:
 
-# Run development server
+```bash
+pnpm install
+```
+
+2. Configure environment variables:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Edit `.env.local`:
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3001
+NEXTAUTH_SECRET=your-secret-here
+```
+
+3. Start the development server:
+
+```bash
 pnpm run dev
 ```
 
-The application will be available at `http://localhost:8362`
+4. Open [http://localhost:3001](http://localhost:3001)
 
-## Usage
+### Default Credentials
 
-### 1. Register an Admin Account
+- Email: `admin@example.com`
+- Password: `admin123`
 
-1. Navigate to `http://localhost:8362`
-2. Click "Register"
-3. Fill in your details:
-   - First Name
-   - Last Name
-   - Email
-   - Password (min 8 characters)
-4. Click "Create Account"
+⚠️ Change these credentials immediately after first login!
 
-### 2. Login
-
-1. Navigate to `http://localhost:8362/login`
-2. Enter your email and password
-3. Click "Sign In"
-4. You'll be redirected to the dashboard
-
-### 3. Manage OAuth2 Clients
-
-#### View Clients
-
-- After login, you'll see the dashboard with all registered clients
-- Each client card shows:
-  - Client Name
-  - Client ID
-  - Redirect URIs
-  - Grant Types
-  - Scopes
-
-#### Create New Client
-
-1. Click "New Client" button
-2. Fill in the form:
-   - **Client Name**: Name of your application
-   - **Redirect URIs**: Where users will be redirected after auth (required)
-   - **Post Logout Redirect URIs**: Where users go after logout (optional)
-   - **Scopes**: Space-separated list (default: `openid email profile offline_access`)
-   - **Token Endpoint Auth Method**:
-     - `none` for public clients with PKCE (recommended for SPAs)
-     - `client_secret_basic` for confidential clients
-     - `client_secret_post` for confidential clients
-3. Click "Create Client"
-4. Save the `client_id` (and `client_secret` if applicable)
-
-#### Edit Client
-
-1. Click the edit icon (pencil) on a client card
-2. Modify the client details
-3. Click "Save Changes"
-
-#### Delete Client
-
-1. Click the delete icon (trash) on a client card
-2. Confirm the deletion
-3. The client will be permanently removed
-
-## API Endpoints
-
-### Authentication
-
-- `POST /api/auth/signin` - Sign in with credentials
-- `POST /api/auth/signout` - Sign out
-- `GET /api/auth/session` - Get current session
-
-### OAuth2 Flows (Hydra Integration)
-
-- `GET /oauth2/login` - Login page for OAuth2 flow
-- `GET /oauth2/consent` - Consent page for OAuth2 flow
-- `GET /oauth2/logout` - Logout page for OAuth2 flow
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Admin Dashboard (apps/web)                                  │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌──────────────┐         ┌──────────────┐                  │
-│  │  NextAuth.js │────────▶│  Backend API │                  │
-│  │  (Session)   │         │  (NestJS)    │                  │
-│  └──────────────┘         └──────┬───────┘                  │
-│                                   │                          │
-│  ┌──────────────┐                 │                          │
-│  │  Dashboard   │─────────────────┤                          │
-│  │  (React)     │                 │                          │
-│  └──────────────┘                 │                          │
-│                                   │                          │
-└───────────────────────────────────┼──────────────────────────┘
-                                    │
-                    ┌───────────────▼───────────────┐
-                    │  Backend Services             │
-                    ├───────────────────────────────┤
-                    │  - Ory Kratos (Users)         │
-                    │  - Ory Hydra (OAuth2)         │
-                    └───────────────────────────────┘
-```
-
-## Tech Stack
-
-- **Framework**: Next.js 15 (App Router)
-- **Authentication**: NextAuth.js
-- **UI Components**: shadcn/ui
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **Theme**: next-themes
-
-## Development
-
-### Project Structure
+## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── api/auth/[...nextauth]/  # NextAuth API routes
-│   ├── dashboard/               # Dashboard pages
-│   │   ├── page.tsx            # Main dashboard
+│   ├── dashboard/
+│   │   ├── page.tsx              # Main dashboard (OAuth2 clients)
+│   │   ├── profile/
+│   │   │   └── page.tsx          # Profile management
+│   │   ├── users/
+│   │   │   ├── page.tsx          # User list
+│   │   │   └── [id]/page.tsx     # User details/edit
 │   │   └── clients/
-│   │       └── new/            # Create new client
-│   ├── login/                  # Login page
-│   ├── register/               # Registration page
-│   └── oauth2/                 # OAuth2 flow pages
+│   │       ├── new/page.tsx      # Create OAuth2 client
+│   │       ├── [id]/page.tsx     # Client details
+│   │       └── success/page.tsx  # Client creation success
+│   ├── login/
+│   │   └── page.tsx              # Login page
+│   ├── register/
+│   │   └── page.tsx              # Registration page
+│   └── oauth2/
+│       ├── login/page.tsx        # OAuth2 login flow
+│       ├── consent/page.tsx      # OAuth2 consent flow
+│       └── logout/page.tsx       # OAuth2 logout flow
 ├── components/
-│   ├── auth-guard.tsx          # Protected route wrapper
-│   └── providers.tsx           # App providers
+│   ├── auth-guard.tsx            # Route protection component
+│   └── role-based-nav.tsx        # Dynamic navigation
 ├── lib/
+│   ├── api/
+│   │   └── client.ts             # Authenticated HTTP client
 │   └── auth/
-│       └── auth-config.ts      # NextAuth configuration
+│       └── auth-config.ts        # NextAuth configuration
 └── types/
-    ├── next-auth.d.ts          # NextAuth type definitions
-    └── oauth-client.types.ts   # OAuth2 client types
+    ├── next-auth.d.ts            # NextAuth type extensions
+    └── oauth-client.types.ts     # OAuth2 client types
 ```
 
-### Adding New Features
+## Key Components
 
-1. **New Protected Page**: Wrap with `<AuthGuard>`
-2. **New API Route**: Add to `src/app/api/`
-3. **New Component**: Add to `src/components/`
+### AuthGuard
+
+Protects routes and redirects unauthorized users:
+
+```typescript
+<AuthGuard allowedRoles={["superadmin"]}>
+  <YourProtectedComponent />
+</AuthGuard>
+```
+
+### RoleBasedNav
+
+Dynamic navigation based on user role:
+
+```typescript
+<RoleBasedNav role={session.user.role} />
+```
+
+### Authenticated API Client
+
+HTTP client with automatic token injection:
+
+```typescript
+import { fetchWithAuth } from "@/lib/api/client"
+
+const response = await fetchWithAuth("/users/me")
+const data = await response.json()
+```
+
+## Pages
+
+### Dashboard (`/dashboard`)
+
+- Lists all OAuth2 clients (superadmin only)
+- Quick actions: view, delete clients
+- Create new client button
+
+### Profile (`/dashboard/profile`)
+
+- View current user information
+- Edit name and email
+- Change password
+
+### Users (`/dashboard/users`)
+
+- List all users (superadmin only)
+- Search and filter users
+- Quick actions: view, delete users
+
+### User Details (`/dashboard/users/[id]`)
+
+- View user details (superadmin only)
+- Edit user profile
+- Change user role
+- Delete user
+
+### Create Client (`/dashboard/clients/new`)
+
+- Form to create new OAuth2 client (superadmin only)
+- Configure redirect URIs, scopes, grant types
+- Validation and error handling
+
+### Client Details (`/dashboard/clients/[id]`)
+
+- View client configuration (superadmin only)
+- Copy client ID and secret
+- Delete client
+
+## Authentication Flow
+
+1. User visits protected route
+2. AuthGuard checks for valid session
+3. If no session, redirect to `/login`
+4. User logs in with email/password
+5. Backend validates credentials
+6. JWT token issued and stored in session
+7. User redirected to original route
+
+## Role-Based Access Control
+
+### User Role
+
+- Access: Profile management only
+- Restrictions: Cannot access Users or Clients pages
+
+### Superadmin Role
+
+- Access: Full system access
+- Permissions:
+  - Manage all users
+  - Manage OAuth2 clients
+  - View system-wide data
+
+## API Integration
+
+All API calls go through the authenticated client:
+
+```typescript
+// GET request
+const response = await fetchWithAuth("/endpoint")
+
+// POST request
+const response = await fetchWithAuth("/endpoint", {
+  method: "POST",
+  body: JSON.stringify(data),
+})
+
+// With custom headers
+const response = await fetchWithAuth("/endpoint", {
+  headers: {
+    "Custom-Header": "value",
+  },
+})
+```
+
+## Environment Variables
+
+| Variable              | Description         | Example                                 |
+| --------------------- | ------------------- | --------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | Backend API URL     | `http://localhost:3000`                 |
+| `NEXTAUTH_URL`        | Dashboard URL       | `http://localhost:3001`                 |
+| `NEXTAUTH_SECRET`     | NextAuth secret key | Generate with `openssl rand -base64 32` |
+
+## Building for Production
+
+```bash
+# Build
+pnpm run build
+
+# Start production server
+pnpm run start
+```
 
 ## Troubleshooting
 
-### "Invalid credentials" error
+### "Unauthorized" errors
 
-- Ensure the backend API is running
-- Check that the user exists in Kratos
-- Verify the password is correct
+- Check that backend API is running
+- Verify `NEXT_PUBLIC_API_URL` is correct
+- Ensure you're logged in with valid credentials
 
-### "Failed to fetch clients" error
+### Session expires immediately
 
-- Ensure Hydra is running
-- Check that the backend API can connect to Hydra
-- Verify CORS is configured correctly
+- Check `NEXTAUTH_SECRET` is set and consistent
+- Verify backend JWT_SECRET matches
 
-### Session not persisting
+### Cannot access superadmin pages
 
-- Check that `NEXTAUTH_SECRET` is set
-- Verify `NEXTAUTH_URL` matches your application URL
-- Clear browser cookies and try again
+- Verify your user has "superadmin" role
+- Check backend role assignment
+- Clear browser cookies and login again
 
-## Security Notes
+## Contributing
 
-- Always use HTTPS in production
-- Generate a strong `NEXTAUTH_SECRET`
-- Implement rate limiting for login attempts
-- Use secure password requirements
-- Regularly update dependencies
+See main project README for contribution guidelines.
 
 ## License
 
-UNLICENSED
+MIT License - see LICENSE file in project root.

@@ -56,11 +56,13 @@ export const HydraProvider: OAuthConfig<HydraProfile> = {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        console.error("[NextAuth] Token exchange failed:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-        })
+        if (process.env.NODE_ENV === "development") {
+          console.error("[NextAuth] Token exchange failed:", {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData,
+          })
+        }
         throw new Error(`Token exchange failed: ${response.statusText}`)
       }
 

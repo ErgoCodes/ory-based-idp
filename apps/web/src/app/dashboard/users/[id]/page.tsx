@@ -82,7 +82,6 @@ function UserDetailsContent() {
         role: data.traits.role,
       })
     } catch (err) {
-      console.error("Error fetching user:", err)
       setError(err instanceof Error ? err.message : "Failed to load user")
     } finally {
       setLoading(false)
@@ -119,7 +118,6 @@ function UserDetailsContent() {
       setEditMode(false)
       alert("User updated successfully!")
     } catch (err) {
-      console.error("Error updating user:", err)
       setError(err instanceof Error ? err.message : "Failed to update user")
     }
   }
@@ -144,8 +142,7 @@ function UserDetailsContent() {
 
       alert("User deleted successfully")
       router.push("/dashboard/users")
-    } catch (err) {
-      console.error("Error deleting user:", err)
+    } catch {
       alert("Failed to delete user")
     }
   }

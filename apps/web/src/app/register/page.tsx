@@ -43,7 +43,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch(`${apiUrl}/auth/users`, {
+      const response = await fetch(`${apiUrl}/auth/registration`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,8 +66,7 @@ export default function RegisterPage() {
       // Registro exitoso
       alert("Registration successful! You can now login.")
       router.push("/")
-    } catch (err) {
-      console.error("Registration error:", err)
+    } catch {
       setError("Failed to connect to server")
       setLoading(false)
     }

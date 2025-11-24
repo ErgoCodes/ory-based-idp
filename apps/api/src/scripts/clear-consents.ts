@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
-import { HydraService } from '../hydra/hydra.service';
+import { OAuth2FlowService } from '../hydra/oauth2-flow.service';
 
 /**
  * Script to clear all OAuth2 consent sessions
@@ -12,7 +12,7 @@ async function clearConsents() {
   console.log('🚀 Starting consent cleanup...\n');
 
   const app = await NestFactory.createApplicationContext(AppModule);
-  const hydraService = app.get(HydraService);
+  const oauth2FlowService = app.get(OAuth2FlowService);
 
   try {
     // Note: Hydra doesn't have a direct API to list/delete all consents

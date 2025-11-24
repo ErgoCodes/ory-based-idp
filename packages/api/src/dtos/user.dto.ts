@@ -1,8 +1,6 @@
 import { z } from "zod"
 
-// ============================================
 // User Management DTOs
-// ============================================
 
 export const UpdateProfileSchema = z.object({
   name: z

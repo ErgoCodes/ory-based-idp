@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { sign, verify, decode, SignOptions } from 'jsonwebtoken';
+import { sign, verify, decode } from 'jsonwebtoken';
 
 export interface JwtPayload {
   userId: string;
@@ -46,8 +46,7 @@ export class JwtService {
     try {
       const decoded = verify(token, this.secret) as JwtPayload;
       return decoded;
-    } catch (error) {
-      console.error('JWT verification failed:', error);
+    } catch {
       return null;
     }
   }

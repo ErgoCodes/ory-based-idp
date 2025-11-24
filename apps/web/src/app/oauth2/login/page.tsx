@@ -55,15 +55,13 @@ function LoginPageContent() {
         // If Hydra says we can skip login (user already authenticated),
         // automatically accept it without showing the UI
         if (data.skip) {
-          console.log("Login can be skipped, auto-accepting with subject:", data.subject)
           await autoAcceptLogin(loginChallenge, data.subject, apiUrl)
           return
         }
 
         setLoginRequest(data)
         setLoading(false)
-      } catch (err) {
-        console.error("Failed to fetch login request:", err)
+      } catch {
         setError("Failed to connect to authentication server")
         setLoading(false)
       }
@@ -89,14 +87,6 @@ function LoginPageContent() {
         password,
         remember,
       }
-      console.log("Submitting login with:", {
-        email,
-        remember,
-        loginChallenge,
-        hasPassword: !!password,
-        passwordLength: password?.length || 0,
-      })
-      console.log("Request body:", requestBody)
 
       const response = await fetch(`${apiUrl}/oauth2/login?login_challenge=${loginChallenge}`, {
         method: "POST",
@@ -105,13 +95,11 @@ function LoginPageContent() {
         },
         body: JSON.stringify(requestBody),
       })
-      console.log("Response status:", response.status)
 
       const data = await response.json()
 
       if (!response.ok) {
         const errorData: ErrorResponse = data
-        console.error("Login error response:", data)
         setError(errorData.error_description || errorData.error || JSON.stringify(data))
         setSubmitting(false)
         return
@@ -124,8 +112,7 @@ function LoginPageContent() {
         setError("Invalid response from server")
         setSubmitting(false)
       }
-    } catch (err) {
-      console.error("Failed to submit login:", err)
+    } catch {
       setError("Failed to connect to authentication server")
       setSubmitting(false)
     }
@@ -280,16 +267,11 @@ async function autoAcceptLogin(loginChallenge: string, subject: string, apiUrl: 
     const data = await response.json()
 
     if (response.ok && data.redirect_to) {
-      // Redirect to consent or back to the OAuth2 client
       globalThis.location.href = data.redirect_to
     } else {
-      console.error("Failed to auto-accept login:", data)
-      // If auto-accept fails, reload the page to show the login form
       globalThis.location.reload()
     }
-  } catch (error) {
-    console.error("Error auto-accepting login:", error)
-    // If auto-accept fails, reload the page to show the login form
+  } catch {
     globalThis.location.reload()
   }
 }

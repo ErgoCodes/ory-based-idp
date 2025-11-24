@@ -9,6 +9,13 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -22,6 +29,8 @@ import {
 } from '@repo/api/dtos/user.dto';
 import { ResultUtils } from '../common/result';
 
+@ApiTags('Users')
+@ApiBearerAuth()
 @Controller('users')
 @UseGuards(AuthGuard, RolesGuard)
 export class UserController {
@@ -29,6 +38,9 @@ export class UserController {
 
   @Get('me')
   @Roles('user', 'superadmin')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getProfile(@Request() req) {
     const userId = req.user.userId;
 
@@ -45,6 +57,26 @@ export class UserController {
 
   @Patch('me')
   @Roles('user', 'superadmin')
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiBody({
+    description: 'Profile update data',
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', example: 'newemail@example.com' },
+        name: {
+          type: 'object',
+          properties: {
+            first: { type: 'string', example: 'John' },
+            last: { type: 'string', example: 'Doe' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateProfile(
     @Request() req,
     @Body(new ZodValidationPipe(UpdateProfileSchema)) dto: UpdateProfileDto,
@@ -73,6 +105,25 @@ export class UserController {
   @Post('me/password')
   @Roles('user', 'superadmin')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Change current user password' })
+  @ApiBody({
+    description: 'Password change data',
+    schema: {
+      type: 'object',
+      properties: {
+        currentPassword: { type: 'string', example: 'OldPass123!' },
+        newPassword: { type: 'string', example: 'NewSecurePass456!' },
+        confirmPassword: { type: 'string', example: 'NewSecurePass456!' },
+      },
+      required: ['currentPassword', 'newPassword', 'confirmPassword'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid data' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized or incorrect current password',
+  })
   async changePassword(
     @Request() req,
     @Body(new ZodValidationPipe(ChangePasswordSchema)) dto: ChangePasswordDto,

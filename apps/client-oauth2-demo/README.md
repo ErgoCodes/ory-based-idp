@@ -1,262 +1,404 @@
-# OAuth2 Client Demo with Refresh Token Support
+# OAuth2 Demo Client
 
-This is a demonstration OAuth2 client application that showcases the complete OAuth2 Authorization Code Flow with PKCE and automatic token refresh.
+> Example application demonstrating OAuth2 integration with the Identity Provider
+
+## Overview
+
+This is a demonstration application that shows how to integrate with the Ory-Based Identity Provider using the OAuth2 Authorization Code Flow. It serves as a reference implementation for developers who want to add OAuth2 authentication to their applications.
 
 ## Features
 
-- ✅ OAuth2 Authorization Code Flow with PKCE
-- ✅ Automatic access token refresh using refresh tokens
-- ✅ Token rotation support
-- ✅ Protected routes with authentication
-- ✅ Automatic retry on 401 errors
-- ✅ User session management
+- **OAuth2 Authentication**: Complete Authorization Code Flow implementation
+- **NextAuth.js Integration**: Seamless authentication with NextAuth.js
+- **Token Management**: Automatic token refresh with refresh tokens
+- **Protected Routes**: Example of route protection
+- **User Profile**: Display authenticated user information
+- **Session Management**: Secure session handling
+
+## Technology Stack
+
+- **Framework**: Next.js 15
+- **Authentication**: NextAuth.js with custom OAuth2 provider
+- **Styling**: Tailwind CSS
+- **TypeScript**: Full type safety
 
 ## Getting Started
 
-### 1. Prerequisites
+### Prerequisites
 
-- Ory Hydra running on `http://localhost:4444` (public) and `http://localhost:4445` (admin)
-- An OAuth2 client registered in Hydra with:
-  - `grant_types`: `['authorization_code', 'refresh_token']`
-  - `response_types`: `['code']`
-  - `scope`: `'openid email profile offline_access'`
-  - `token_endpoint_auth_method`: `'none'` (for PKCE)
-  - `redirect_uris`: `['http://localhost:3001/callback']`
+- Node.js 18+
+- pnpm
+- Identity Provider running (backend API + Ory services)
+- OAuth2 client created in the admin dashboard
 
-### 2. Environment Configuration
+### Installation
 
-Copy `.env.example` to `.env.local` and configure:
-
-```bash
-# Client-side configuration (exposed to browser)
-NEXT_PUBLIC_OAUTH2_AUTHORIZATION_ENDPOINT=http://localhost:4444/oauth2/auth
-NEXT_PUBLIC_OAUTH2_CLIENT_ID=your-client-id-here
-NEXT_PUBLIC_OAUTH2_REDIRECT_URI=http://localhost:3001/callback
-NEXT_PUBLIC_OAUTH2_SCOPE=openid email profile offline_access
-NEXT_PUBLIC_OAUTH2_USERINFO_ENDPOINT=http://localhost:4444/userinfo
-
-# Server-side configuration (not exposed to browser)
-OAUTH2_TOKEN_ENDPOINT=http://localhost:4444/oauth2/token
-OAUTH2_CLIENT_ID=your-client-id-here
-OAUTH2_REDIRECT_URI=http://localhost:3001/callback
-```
-
-**Important:** Make sure to include `offline_access` in the scope to receive refresh tokens.
-
-### 3. Install Dependencies
+1. Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-### 4. Run the Application
+2. Create an OAuth2 client:
+   - Login to admin dashboard at `http://localhost:3001`
+   - Navigate to "OAuth2 Clients"
+   - Click "Create New Client"
+   - Fill in:
+     - **Client Name**: "Demo Application"
+     - **Redirect URIs**: `http://localhost:8363/api/auth/callback/hydra`
+     - **Grant Types**: `authorization_code`, `refresh_token`
+     - **Scopes**: `openid email profile offline_access`
+   - Save and copy the **Client ID** and **Client Secret**
+
+3. Configure environment variables:
 
 ```bash
-pnpm dev
+cp .env.local.example .env.local
 ```
 
-The application will be available at `http://localhost:3001`.
+Edit `.env.local`:
 
-## Application Structure
+```bash
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:8363
+NEXTAUTH_SECRET=generate-with-openssl-rand-base64-32
 
-```
-apps/client-oauth2-demo/
-├── src/
-│   ├── app/
-│   │   ├── page.tsx                    # Home page with login
-│   │   ├── callback/page.tsx           # OAuth2 callback handler
-│   │   ├── protected/page.tsx          # Protected page (requires auth)
-│   │   └── api/
-│   │       └── auth/
-│   │           ├── token/route.ts      # Token exchange endpoint
-│   │           └── refresh/route.ts    # Token refresh endpoint
-│   └── lib/
-│       ├── pkce.ts                     # PKCE utilities
-│       └── token-manager.ts            # Token management & auto-refresh
-├── .env.example                        # Environment variables template
-├── README.md                           # This file
-└── REFRESH_TOKEN.md                    # Detailed refresh token documentation
+# OAuth2 Client Configuration (Public)
+NEXT_PUBLIC_OAUTH2_AUTHORIZATION_ENDPOINT=http://localhost:4444/oauth2/auth
+NEXT_PUBLIC_OAUTH2_SCOPE=openid email profile offline_access
+NEXT_PUBLIC_OAUTH2_USERINFO_ENDPOINT=http://localhost:4444/userinfo
+
+# OAuth2 Server Configuration (Private)
+OAUTH2_CLIENT_ID=your-client-id-from-step-2
+OAUTH2_TOKEN_ENDPOINT=http://localhost:4444/oauth2/token
 ```
 
-## Usage Flow
+4. Start the application:
 
-### 1. Login
+```bash
+pnpm run dev
+```
 
-1. Navigate to `http://localhost:3001`
-2. Click "Login with OAuth2"
-3. You'll be redirected to the login page
-4. Enter your credentials
-5. Grant consent
-6. You'll be redirected back with tokens
+5. Open [http://localhost:8363](http://localhost:8363)
 
-### 2. Access Protected Resources
+## How It Works
 
-1. After login, click "Go to Protected Page"
-2. The page will display your user information
-3. Click "Test API Call" to make an authenticated request
-4. If your access token has expired, it will automatically refresh
+### OAuth2 Authorization Code Flow
 
-### 3. Automatic Token Refresh
+```
+┌─────────────┐                                  ┌──────────────────┐
+│   Browser   │                                  │  Demo Client     │
+│             │                                  │  (This App)      │
+└──────┬──────┘                                  └────────┬─────────┘
+       │                                                  │
+       │ 1. Click "Sign in with OAuth2"                  │
+       ├─────────────────────────────────────────────────>
+       │                                                  │
+       │ 2. Redirect to authorization endpoint           │
+       <─────────────────────────────────────────────────┤
+       │                                                  │
+       │                                  ┌───────────────────────┐
+       │ 3. Login & Consent               │  Identity Provider    │
+       ├─────────────────────────────────>│  (Ory Hydra/Kratos)  │
+       │                                  └───────────┬───────────┘
+       │ 4. Authorization code                        │
+       <──────────────────────────────────────────────┤
+       │                                              │
+       │ 5. Exchange code for tokens                  │
+       ├──────────────────────────────────────────────>
+       │                                              │
+       │ 6. Access token + Refresh token              │
+       <──────────────────────────────────────────────┤
+       │                                              │
+       │ 7. Redirect to callback                      │
+       ├─────────────────────────────────────────────>
+       │                                              │
+       │ 8. User info + session created               │
+       <─────────────────────────────────────────────┤
+       │                                              │
+```
 
-The application automatically handles token refresh:
+### Key Components
+
+#### 1. Hydra Provider (`src/lib/auth/hydra-provider.ts`)
+
+Custom OAuth2 provider for NextAuth.js:
 
 ```typescript
-import { fetchWithAuth } from "@/lib/token-manager"
-
-// This will automatically refresh the token if it's expired
-const response = await fetchWithAuth("http://localhost:4444/userinfo")
+export const HydraProvider: OAuthConfig<HydraProfile> = {
+  id: "hydra",
+  name: "Hydra",
+  type: "oauth",
+  authorization: {
+    url: process.env.NEXT_PUBLIC_OAUTH2_AUTHORIZATION_ENDPOINT!,
+    params: {
+      scope: process.env.NEXT_PUBLIC_OAUTH2_SCOPE!,
+    },
+  },
+  token: process.env.OAUTH2_TOKEN_ENDPOINT!,
+  userinfo: process.env.NEXT_PUBLIC_OAUTH2_USERINFO_ENDPOINT!,
+  // ... profile mapping
+}
 ```
 
-### 4. Logout
+#### 2. Auth Configuration (`src/lib/auth/auth-config.ts`)
 
-Click "Logout" to clear all tokens and end the session.
+NextAuth.js configuration with token refresh:
 
-## Key Components
-
-### Token Manager (`src/lib/token-manager.ts`)
-
-Provides utilities for token management:
-
-- `refreshAccessToken()`: Manually refresh the access token
-- `fetchWithAuth(url, options)`: Make authenticated requests with auto-refresh
-- `getAccessToken()`: Get the current access token
-- `isAuthenticated()`: Check if user is authenticated
-- `clearTokens()`: Clear all stored tokens
-- `getUserClaims()`: Get stored user claims
-
-### PKCE Utilities (`src/lib/pkce.ts`)
-
-Implements PKCE (Proof Key for Code Exchange):
-
-- `generateCodeVerifier()`: Generate random code verifier
-- `generateCodeChallenge(verifier)`: Generate code challenge (S256)
-- `generateState()`: Generate state parameter for CSRF protection
-- `initiateOAuth2Flow()`: Start the OAuth2 authorization flow
-
-### Token Exchange Endpoint (`src/app/api/auth/token/route.ts`)
-
-Exchanges authorization code for tokens:
-
-```
-POST /api/auth/token
-Body: { code, code_verifier }
-Response: { access_token, refresh_token, id_token, ... }
+```typescript
+export const authOptions: NextAuthOptions = {
+  providers: [HydraProvider],
+  callbacks: {
+    async jwt({ token, account, profile }) {
+      // Store tokens and handle refresh
+    },
+    async session({ session, token }) {
+      // Populate session with user data
+    },
+  },
+  // ...
+}
 ```
 
-### Token Refresh Endpoint (`src/app/api/auth/refresh/route.ts`)
+#### 3. Protected Routes
 
-Refreshes access token using refresh token:
+Example of protecting routes:
 
+```typescript
+// In page component
+import { getServerSession } from "next-auth"
+import { redirect } from "next/navigation"
+
+export default async function ProtectedPage() {
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
+    redirect("/login")
+  }
+
+  return <div>Protected content</div>
+}
 ```
-POST /api/auth/refresh
-Body: { refresh_token }
-Response: { access_token, refresh_token, id_token, ... }
+
+## Pages
+
+### Home (`/`)
+
+- Landing page
+- "Sign in with OAuth2" button
+- Public access
+
+### Login (`/login`)
+
+- Custom login page
+- Initiates OAuth2 flow
+- Redirects to Identity Provider
+
+### Profile (`/profile`)
+
+- Protected route
+- Displays user information:
+  - Name
+  - Email
+  - Email verification status
+- Logout button
+
+### Protected (`/protected`)
+
+- Example protected route
+- Requires authentication
+- Demonstrates route protection
+
+## Token Management
+
+### Access Tokens
+
+- Short-lived (typically 1 hour)
+- Used for API requests
+- Automatically included in session
+
+### Refresh Tokens
+
+- Long-lived (typically 30 days)
+- Used to obtain new access tokens
+- Automatically refreshed when access token expires
+
+### Automatic Refresh
+
+The application automatically refreshes tokens:
+
+```typescript
+async function refreshAccessToken(token: JWT): Promise<JWT> {
+  try {
+    const response = await fetch(tokenEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: token.refreshToken,
+        client_id: clientId,
+      }),
+    })
+
+    const refreshedTokens = await response.json()
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+    }
+  } catch (error) {
+    return { ...token, error: "RefreshAccessTokenError" }
+  }
+}
 ```
 
-### Userinfo Endpoint (`src/app/api/auth/userinfo/route.ts`)
+## Environment Variables
 
-Fetches user information from Hydra (acts as CORS proxy):
+| Variable                                    | Description          | Example                                 |
+| ------------------------------------------- | -------------------- | --------------------------------------- |
+| `NEXTAUTH_URL`                              | Application URL      | `http://localhost:8363`                 |
+| `NEXTAUTH_SECRET`                           | NextAuth secret key  | Generate with `openssl rand -base64 32` |
+| `NEXT_PUBLIC_OAUTH2_AUTHORIZATION_ENDPOINT` | OAuth2 auth endpoint | `http://localhost:4444/oauth2/auth`     |
+| `NEXT_PUBLIC_OAUTH2_SCOPE`                  | Requested scopes     | `openid email profile offline_access`   |
+| `NEXT_PUBLIC_OAUTH2_USERINFO_ENDPOINT`      | Userinfo endpoint    | `http://localhost:4444/userinfo`        |
+| `OAUTH2_CLIENT_ID`                          | OAuth2 client ID     | From admin dashboard                    |
+| `OAUTH2_TOKEN_ENDPOINT`                     | Token endpoint       | `http://localhost:4444/oauth2/token`    |
 
+⚠️ **Important**: `NEXTAUTH_SECRET` must remain constant. Changing it will invalidate all existing sessions.
+
+## Customization
+
+### Adding Custom Claims
+
+To access custom claims from the ID token:
+
+1. Update the profile type:
+
+```typescript
+interface HydraProfile {
+  sub: string
+  email: string
+  email_verified: boolean
+  name?: string
+  custom_claim?: string // Add your claim
+}
 ```
-GET /api/auth/userinfo
-Headers: { Authorization: Bearer <access_token> }
-Response: { sub, email, name, ... }
+
+2. Map in the provider:
+
+```typescript
+profile(profile: HydraProfile) {
+  return {
+    id: profile.sub,
+    email: profile.email,
+    name: profile.name,
+    customClaim: profile.custom_claim,  // Map your claim
+  }
+}
 ```
 
-## Security Features
+### Styling
 
-### 1. PKCE (Proof Key for Code Exchange)
+The application uses Tailwind CSS. Customize in `tailwind.config.ts`:
 
-Protects against authorization code interception attacks:
-
-- Code verifier generated with cryptographically secure random values
-- Code challenge uses SHA-256 hashing (S256 method)
-- Code verifier validated during token exchange
-
-### 2. State Parameter
-
-Protects against CSRF attacks:
-
-- Random state generated for each authorization request
-- State validated on callback
-
-### 3. Token Rotation
-
-Hydra implements refresh token rotation:
-
-- Each refresh returns a new refresh token
-- Old refresh token is invalidated
-- Detects and prevents token replay attacks
-
-### 4. Token Storage
-
-Tokens are stored in `sessionStorage`:
-
-- Cleared when browser tab is closed
-- Not shared across tabs
-- Consider using `httpOnly` cookies in production
-
-## Testing
-
-### Test Token Refresh
-
-1. Log in to the application
-2. Navigate to the protected page
-3. Open browser DevTools → Application → Session Storage
-4. Note the current `access_token` value
-5. Delete the `access_token` from session storage
-6. Click "Test Token Refresh"
-7. Verify that a new access token is obtained automatically and the API call succeeds
-
-### Test Token Rotation
-
-1. Log in to the application
-2. Note the current `refresh_token` value in session storage
-3. Trigger a token refresh (delete access token and make API call)
-4. Verify that a new `refresh_token` is stored
-
-### Test Expired Refresh Token
-
-1. Log in to the application
-2. Corrupt the `refresh_token` in session storage
-3. Delete the `access_token`
-4. Try to make an API call
-5. Verify that you're redirected to login
+```typescript
+export default {
+  theme: {
+    extend: {
+      colors: {
+        primary: "#your-color",
+      },
+    },
+  },
+}
+```
 
 ## Troubleshooting
 
-### Not receiving refresh token
+### "Invalid redirect_uri" error
 
-**Cause:** Missing `offline_access` scope
+- Verify redirect URI in `.env.local` matches the one configured in admin dashboard
+- Check for trailing slashes (should match exactly)
 
-**Solution:** Ensure your authorization request includes `offline_access` in the scope:
+### "Invalid client" error
 
-```typescript
-scope: "openid email profile offline_access"
+- Verify `OAUTH2_CLIENT_ID` is correct
+- Ensure the client exists in the admin dashboard
+- Check client hasn't been deleted
+
+### Session expires immediately
+
+- Verify `NEXTAUTH_SECRET` is set and hasn't changed
+- Check token expiration times
+- Review browser console for errors
+
+### Token refresh fails
+
+- Ensure `offline_access` scope is included
+- Verify refresh token is being stored
+- Check token endpoint URL is correct
+
+### "JWT decryption failed" error
+
+- `NEXTAUTH_SECRET` has changed - all sessions invalidated
+- Generate new secret and restart application
+- Users will need to login again
+
+## Building for Production
+
+```bash
+# Build
+pnpm run build
+
+# Start production server
+pnpm run start
 ```
 
-### Token refresh fails with 401
+### Production Checklist
 
-**Possible causes:**
+- [ ] Update `NEXTAUTH_URL` to production domain
+- [ ] Generate strong `NEXTAUTH_SECRET`
+- [ ] Update OAuth2 client redirect URIs in admin dashboard
+- [ ] Enable HTTPS
+- [ ] Configure CORS if needed
+- [ ] Test complete OAuth2 flow
+- [ ] Test token refresh
+- [ ] Test logout
 
-- Refresh token has expired
-- Refresh token has been revoked
-- Client ID mismatch
+## Integration Guide
 
-**Solution:** Clear tokens and re-authenticate
+To integrate OAuth2 authentication in your own application:
 
-### CORS errors when calling Hydra
+1. **Install NextAuth.js**:
 
-**Cause:** Browser blocking cross-origin requests
+```bash
+pnpm add next-auth
+```
 
-**Solution:** Use the API routes (`/api/auth/token` and `/api/auth/refresh`) which act as proxies to Hydra
+2. **Copy the Hydra provider** from `src/lib/auth/hydra-provider.ts`
 
-## Documentation
+3. **Configure NextAuth.js** with the provider
 
-- [REFRESH_TOKEN.md](./REFRESH_TOKEN.md) - Detailed refresh token implementation guide
-- [Ory Hydra Documentation](https://www.ory.com/docs/oauth2-oidc/authorization-code-flow)
-- [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)
+4. **Create OAuth2 client** in admin dashboard
+
+5. **Set environment variables**
+
+6. **Protect routes** using `getServerSession`
+
+7. **Test the flow** end-to-end
+
+## Resources
+
+- [NextAuth.js Documentation](https://next-auth.js.org/)
+- [OAuth2 RFC 6749](https://tools.ietf.org/html/rfc6749)
+- [OpenID Connect Core](https://openid.net/specs/openid-connect-core-1_0.html)
+- [Ory Hydra Documentation](https://www.ory.sh/docs/hydra)
+
+## Contributing
+
+See main project README for contribution guidelines.
 
 ## License
 
-MIT
+MIT License - see LICENSE file in project root.

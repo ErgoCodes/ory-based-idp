@@ -8,6 +8,7 @@ import { AuthGuard } from "@/components/auth-guard"
 import type { OAuth2Client } from "@/types/oauth-client.types"
 import { ArrowLeft, Trash2, Copy, CheckCircle } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api/client"
+import { toast } from "sonner"
 
 function ClientDetailsContent() {
   const { data: session } = useSession()
@@ -81,7 +82,7 @@ function ClientDetailsContent() {
 
       router.push("/dashboard")
     } catch {
-      alert("Failed to delete client")
+      toast.error("Failed to delete client")
     }
   }
 

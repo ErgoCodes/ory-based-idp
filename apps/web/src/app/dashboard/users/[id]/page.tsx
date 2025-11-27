@@ -7,6 +7,7 @@ import { Button } from "@workspace/ui/components/button"
 import { AuthGuard } from "@/components/auth-guard"
 import { RoleBasedNav } from "@/components/role-based-nav"
 import { fetchWithAuth } from "@/lib/api/client"
+import { toast } from "sonner"
 import { ArrowLeft, LogOut, User, Trash2 } from "lucide-react"
 
 interface UserProfile {
@@ -116,7 +117,7 @@ function UserDetailsContent() {
 
       await fetchUser()
       setEditMode(false)
-      alert("User updated successfully!")
+      toast.success("User updated successfully!")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update user")
     }
@@ -140,10 +141,10 @@ function UserDetailsContent() {
         throw new Error("Failed to delete user")
       }
 
-      alert("User deleted successfully")
+      toast.success("User deleted successfully")
       router.push("/dashboard/users")
     } catch {
-      alert("Failed to delete user")
+      toast.error("Failed to delete user")
     }
   }
 

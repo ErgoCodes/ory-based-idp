@@ -7,6 +7,7 @@ import { Button } from "@workspace/ui/components/button"
 import { AuthGuard } from "@/components/auth-guard"
 import { RoleBasedNav } from "@/components/role-based-nav"
 import { fetchWithAuth } from "@/lib/api/client"
+import { toast } from "sonner"
 import { ArrowLeft, LogOut, User } from "lucide-react"
 
 interface Profile {
@@ -105,7 +106,7 @@ function ProfileContent() {
 
       await fetchProfile()
       setEditMode(false)
-      alert("Profile updated successfully!")
+      toast.success("Profile updated successfully!")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update profile")
     }
@@ -138,7 +139,7 @@ function ProfileContent() {
 
       setPasswordMode(false)
       setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-      alert("Password changed successfully!")
+      toast.success("Password changed successfully!")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to change password")
     }

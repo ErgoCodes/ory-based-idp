@@ -1,6 +1,6 @@
 version: v1.2.0
 
-dsn: memory
+dsn: postgres://admin:secret@postgres:5432/kratos_db?sslmode=disable
 
 serve:
   public:
@@ -16,6 +16,11 @@ selfservice:
     - http://localhost:4455
 
   methods:
+    code: # or link
+      enabled: true
+      config:
+        # Defines how long the verification or the recovery code is valid for (default 1h)
+        lifespan: 120m
     password:
       enabled: true
       config:
@@ -67,6 +72,21 @@ selfservice:
 
     login:
       ui_url: http://localhost:4455/login
+      after:
+        hooks:
+          - hook: require_verified_address
+
+    verification:
+      ui_url: http://localhost:8362/verification
+      use: code # Defines which method is used, one of 'code' or 'link'.
+      enabled: true
+
+      # Defines how long the verification flow (the UI interaction, not the link!)
+      # is valid for (default 1h)
+      lifespan: 120m
+
+      # Whether to notify unknown addresses, if verification is requested for them
+      notify_unknown_recipients: false
 
     registration:
       ui_url: http://localhost:4455/registration
@@ -95,7 +115,9 @@ identity:
 
 courier:
   smtp:
-    connection_uri: smtps://test:test@mailslurper:1025/?skip_ssl_verify=true
+    connection_uri: "smtp://carlos.rrt@avangenio.com:CRrt01072481687%2A@correo.avangenio.com:587/"
+    from_address: "carlos.rrt@avangenio.com"
+    from_name: "IDP"
 
 oauth2_provider:
   url: http://hydra:4445

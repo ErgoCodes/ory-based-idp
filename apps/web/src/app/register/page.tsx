@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@workspace/ui/components/button"
+import { toast } from "sonner"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -58,14 +59,36 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
+        console.log(errorData)
         setError(errorData.message || "Registration failed")
         setLoading(false)
         return
       }
 
-      // Registro exitoso
-      alert("Registration successful! You can now login.")
-      router.push("/")
+      // Registro exitoso, mandar email
+      toast.success("Registration successful! Verification email sent.")
+      const emailResponse = await fetch(`${apiUrl}/auth/send-verif-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+        }),
+      })
+
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.json()
+        setError(errorData.message || "Verification email failed")
+        setLoading(false)
+        return
+      }
+
+      const erj = await emailResponse.text()
+      console.log("emailResponse text")
+      console.log(erj)
+
+      router.push(`/verification/notice`)
     } catch {
       setError("Failed to connect to server")
       setLoading(false)

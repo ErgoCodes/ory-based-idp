@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FrontendApi, IdentityApi } from '@ory/client-fetch';
+import { FrontendApi, IdentityApi, VerificationFlow } from '@ory/client-fetch';
 import { RegisterUser, Identity } from '@repo/api';
 import { Result, ResultUtils } from '../common/result';
 import { KratosError, KratosErrorHandler } from './kratos-error.handler';
@@ -20,6 +20,7 @@ export class KratosService {
       const flow = await this.frontendApi.createNativeRegistrationFlow();
       return ResultUtils.ok({ id: flow.id });
     } catch (error) {
+      console.log(error);
       const kratosError = KratosErrorHandler.handle(
         error as never,
         'registration_flow',
@@ -64,6 +65,7 @@ export class KratosService {
         statusCode: 500,
       });
     } catch (error) {
+      console.log(error);
       const kratosError = KratosErrorHandler.handle(
         error as never,
         'registration',
@@ -152,6 +154,7 @@ export class KratosService {
       const mappedIdentity = KratosMapper.toIdentity(identity);
       return ResultUtils.ok(mappedIdentity);
     } catch (error) {
+      console.log(error);
       const kratosError = KratosErrorHandler.handle(
         error as never,
         'create_identity',
@@ -193,6 +196,7 @@ export class KratosService {
         statusCode: 401,
       });
     } catch (error) {
+      console.log(error);
       const kratosError = KratosErrorHandler.handle(
         error as never,
         'verify_credentials',
@@ -316,6 +320,107 @@ export class KratosService {
         error as never,
         'delete_identity',
         'Failed to delete identity',
+      );
+      return ResultUtils.err(kratosError);
+    }
+  }
+
+  /**
+   * Start a verification flow for a given email
+   */
+  async startVerification(
+    email: string,
+  ): Promise<Result<{ flowId: string }, KratosError>> {
+    try {
+      // 1. Create a new verification flow
+      const flow = await this.frontendApi.createNativeVerificationFlow();
+      console.log('start Verification Flow');
+      console.log(flow);
+      return ResultUtils.ok({ flowId: flow.id });
+    } catch (error) {
+      console.log('start Verification Flow Error');
+      console.log(error);
+      const kratosError = KratosErrorHandler.handle(
+        error as never,
+        'verification_flow',
+        'Failed to start verification flow',
+      );
+      return ResultUtils.err(kratosError);
+    }
+  }
+
+  async endVerification(
+    flowId: string,
+    code: string,
+  ): Promise<Result<{ sucess: boolean }, KratosError>> {
+    try {
+      await this.frontendApi.updateVerificationFlow({
+        flow: flowId,
+        updateVerificationFlowBody: {
+          method: 'code',
+          code: code,
+        },
+      });
+      return ResultUtils.ok({ sucess: true });
+    } catch (error) {
+      console.log('complete verification error');
+      console.log(error);
+      const kratosError = KratosErrorHandler.handle(
+        error as never,
+        'verification_flow',
+        'Failed to complete verification flow',
+      );
+      return ResultUtils.err(kratosError);
+    }
+  }
+
+  /**
+   * Create a default superadmin identity with verified email
+   */
+  async createSuperadmin(
+    email: string,
+    password: string,
+  ): Promise<Result<Identity, KratosError>> {
+    try {
+      const identity = await this.identityApi.createIdentity({
+        createIdentityBody: {
+          schema_id: 'default',
+          traits: {
+            email,
+            name: {
+              first: 'Super',
+              last: 'Admin',
+            },
+            role: 'superadmin',
+          },
+          credentials: {
+            password: {
+              config: {
+                password,
+              },
+            },
+          },
+          // 👇 mark email as verified at creation
+          // cast to any to bypass TS type restriction
+          ...({
+            verifiable_addresses: [
+              {
+                value: email,
+                via: 'email',
+                verified: true,
+              },
+            ],
+          } as any),
+        },
+      });
+
+      const mappedIdentity = KratosMapper.toIdentity(identity);
+      return ResultUtils.ok(mappedIdentity);
+    } catch (error) {
+      const kratosError = KratosErrorHandler.handle(
+        error as never,
+        'create_superadmin',
+        'Failed to create superadmin identity',
       );
       return ResultUtils.err(kratosError);
     }

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@workspace/ui/components/button"
 import { AuthGuard } from "@/components/auth-guard"
 import { RoleBasedNav } from "@/components/role-based-nav"
+import { toast } from "sonner"
 import { fetchWithAuth } from "@/lib/api/client"
 import { ArrowLeft, LogOut, User, Eye, Trash2 } from "lucide-react"
 
@@ -89,9 +90,9 @@ function UsersContent() {
 
       // Refresh the list
       fetchUsers()
-      alert("User deleted successfully")
+      toast.success("User deleted successfully")
     } catch {
-      alert("Failed to delete user")
+      toast.error("Failed to delete user")
     }
   }
 

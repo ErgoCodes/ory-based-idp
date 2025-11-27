@@ -9,6 +9,7 @@ import { RoleBasedNav } from "@/components/role-based-nav"
 import type { OAuth2Client } from "@/types/oauth-client.types"
 import { Plus, Trash2, LogOut, User, Eye } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api/client"
+import { toast } from "sonner"
 
 function DashboardContent() {
   const { data: session } = useSession()
@@ -70,7 +71,7 @@ function DashboardContent() {
       // Refresh the list
       fetchClients()
     } catch {
-      alert("Failed to delete client")
+      toast.error("Failed to delete client")
     }
   }
 

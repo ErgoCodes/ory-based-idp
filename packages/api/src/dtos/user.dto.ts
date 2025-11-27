@@ -48,3 +48,14 @@ export const registerUserSchema = z.object({
 })
 
 export type RegisterUserDto = z.infer<typeof registerUserSchema>
+
+export const sendEmailSchema = z.object({
+  email: z.string().email("Invalid email format"),
+})
+export type SendEmailDto = z.infer<typeof sendEmailSchema>
+
+export const verifyEmailSchema = z.object({
+  flowId: z.string().min(1, "flow id is required"),
+  code: z.string().min(1, "code is required"),
+})
+export type verifyEmailDto = z.infer<typeof verifyEmailSchema>

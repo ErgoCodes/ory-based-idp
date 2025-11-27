@@ -29,15 +29,17 @@ export class InitService implements OnModuleInit {
       // Create superadmin identity
       this.logger.log(`Creating default superadmin with email: ${email}`);
 
-      const result = await this.kratosService.createIdentity(
-        {
-          email,
-          password,
-          firstName: 'Super',
-          lastName: 'Admin',
-        },
-        'superadmin', // Explicitly set role to superadmin
-      );
+      // const result = await this.kratosService.createIdentity(
+      //   {
+      //     email,
+      //     password,
+      //     firstName: 'Super',
+      //     lastName: 'Admin',
+      //   },
+      //   'superadmin', // Explicitly set role to superadmin
+      // );
+
+      const result = await this.kratosService.createSuperadmin(email, password);
 
       if (result.success) {
         this.logger.log(
@@ -46,6 +48,8 @@ export class InitService implements OnModuleInit {
         this.logger.warn(
           `IMPORTANT: Please change the default superadmin password immediately!`,
         );
+
+        this.logger.log(`Superadmin email ${email} marked as verified.`);
       } else {
         this.logger.error(
           `Failed to create default superadmin: ${result.error.message}`,

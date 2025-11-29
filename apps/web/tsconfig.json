@@ -2,8 +2,12 @@
   "extends": "@workspace/typescript-config/nextjs.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "@workspace/ui/*": ["../../packages/ui/src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@workspace/ui/*": [
+        "../../packages/ui/src/*"
+      ]
     },
     "plugins": [
       {
@@ -12,11 +16,13 @@
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
+    "next-env.d.ts",
+    "next.config.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

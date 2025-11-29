@@ -47,6 +47,12 @@ export const registerUserSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
 })
 
+export const loginUserSchema = z.object({
+  email: z.string().email({ message: "El email debe ser válido" }),
+  password: z.string().min(1, { message: "La contraseña es requerida" }),
+})
+export type LoginUserDto = z.infer<typeof loginUserSchema>
+
 export type RegisterUserDto = z.infer<typeof registerUserSchema>
 
 export const sendEmailSchema = z.object({

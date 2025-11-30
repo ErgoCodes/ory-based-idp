@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "@workspace/ui/globals.css"
 import { Providers } from "@/components/providers"
 import { Toaster } from "../../../../packages/ui/src/components/sonner"
+import { SidebarProvider } from "@workspace/ui/components/sidebar"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -20,25 +21,27 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex items-center justify-center min-h-screen`}
-      >
-        <Providers>{children}</Providers>
-        <Toaster
-          toastOptions={{
-            // unstyled: true,
-            classNames: {
-              default: "!bg-background !border-2 !border-border",
-              description: "!text-foreground",
-              error: "!bg-background !text-destructive !border-2 !border-border",
-              success: "!text-green-400 !bg-background !border-2 !border-border",
-              warning: "!text-yellow-400 !bg-background !border-2 !border-border",
-              info: "!bg-background !text-blue-400 !border-2 !border-border",
-            },
-          }}
-        />
-      </body>
-    </html>
+    <SidebarProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex items-center justify-center min-h-screen`}
+        >
+          <Providers>{children}</Providers>
+          <Toaster
+            toastOptions={{
+              // unstyled: true,
+              classNames: {
+                default: "!bg-background !border-2 !border-border",
+                description: "!text-foreground",
+                error: "!bg-background !text-destructive !border-2 !border-border",
+                success: "!text-green-400 !bg-background !border-2 !border-border",
+                warning: "!text-yellow-400 !bg-background !border-2 !border-border",
+                info: "!bg-background !text-blue-400 !border-2 !border-border",
+              },
+            }}
+          />
+        </body>
+      </html>
+    </SidebarProvider>
   )
 }

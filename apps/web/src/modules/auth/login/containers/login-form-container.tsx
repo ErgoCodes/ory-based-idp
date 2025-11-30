@@ -51,7 +51,7 @@ function LoginFormContainer() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full max-w-md mx-auto">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full max-w-md mx-auto my-50">
         <Card className="shadow-md border border-muted">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-semibold">Admin Login</CardTitle>

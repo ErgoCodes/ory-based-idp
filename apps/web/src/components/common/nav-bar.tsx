@@ -1,6 +1,8 @@
 "use client"
+import { authOptions } from "@/lib/auth/auth-config"
 import { Button } from "@workspace/ui/components/button"
 import { LogOut, User } from "lucide-react"
+import { getServerSession } from "next-auth"
 import { signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import React from "react"

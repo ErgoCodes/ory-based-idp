@@ -4,12 +4,13 @@ import React from "react"
 function LoginForm() {
   return (
     <div className=" flex flex-col gap-4">
-      <RHFTextField name="email" label="Email" required />
+      <RHFTextField name="email" label="Email" required placeholder="Enter your email..." />
       <RHFTextField
         name="password"
         type="password"
-        label="Contraseña"
+        label="Password"
         useCase="password"
+        placeholder="Enter your password..."
         required
       />
     </div>

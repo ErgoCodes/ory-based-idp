@@ -33,12 +33,7 @@ export async function AppSidebar() {
   const session = await getServerSession(authOptions)
   return (
     <Sidebar className="z-50 bg-secondary">
-      <SidebarHeader className="bg-secondary">
-        <Link href="/dashboard">
-          <h1 className="flex gap-2 text-2xl font-bold">Dashboard</h1>
-        </Link>
-        <p className="text-sm text-muted-foreground">Welcome back, {session?.user?.email}</p>
-      </SidebarHeader>
+      <SidebarHeader className="bg-secondary"></SidebarHeader>
       <SidebarContent className="bg-secondary">
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>

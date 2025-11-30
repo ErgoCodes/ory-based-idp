@@ -7,7 +7,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <AppSidebar />
-      <main className="flex flex-col gap-6 pl-64 pt-25  ">
+      <main className="flex flex-col gap-6  pt-20 w-full  ">
         {/* <SidebarTrigger /> */}
         <DashboardNavBar />
         {children}

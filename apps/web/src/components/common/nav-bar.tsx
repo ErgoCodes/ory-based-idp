@@ -11,24 +11,38 @@ export default function DashboardNavBar() {
     signOut({ callbackUrl: "/login" })
   }
   return (
-    <header className="sticky top-0 z-40 w-full border-b ">
-      <nav className=" z-40 top-0 left-0 w-full border-b backdrop-blur px-4 py-3 fixed bg-secondary">
-        <div className="max-w-7xl mx-auto flex justify-end items-center gap-4">
-          <Button variant="ghost" className="px-3 py-2 text-sm font-medium">
-            <Link href="dashboard/profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span className="capitalize">{session?.user?.name}</span>
+    <header className="sticky top-0 z-40 w-full border-b bg-secondary backdrop-blur">
+      <nav className="w-full px-4 py-1">
+        <div className="w-full flex justify-between items-center gap-4">
+          <div>
+            <Link href="/dashboard">
+              <h1 className="flex gap-2 text-2xl font-bold cursor-pointer hover:opacity-80 transition">
+                Dashboard
+              </h1>
             </Link>
-          </Button>
+            <p className="text-sm text-muted-foreground">Welcome back, {session?.user?.email}</p>
+          </div>
 
-          <Button
-            variant="outline"
-            className="px-3 py-2 text-sm font-medium"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard/profile">
+              <Button
+                variant="ghost"
+                className="px-3 py-2 cursor-pointer hover:border text-sm font-medium flex items-center gap-2"
+              >
+                <User className="h-4 w-4" />
+                <span className="capitalize">{session?.user?.name}</span>
+              </Button>
+            </Link>
+
+            <Button
+              variant="outline"
+              className="px-3 py-2 cursor-pointer text-sm font-medium flex items-center"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </nav>
     </header>

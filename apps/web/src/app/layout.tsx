@@ -21,11 +21,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <SidebarProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex items-center justify-center min-h-screen`}
-        >
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased min-h-screen`}
+      >
+        <SidebarProvider className="flex items-center justify-center">
           <Providers>{children}</Providers>
           <Toaster
             toastOptions={{
@@ -40,8 +40,8 @@ export default function RootLayout({
               },
             }}
           />
-        </body>
-      </html>
-    </SidebarProvider>
+        </SidebarProvider>
+      </body>
+    </html>
   )
 }

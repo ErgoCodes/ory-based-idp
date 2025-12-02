@@ -23,7 +23,7 @@ function LogoutContent() {
 
   const handleLogout = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
       const response = await fetch(`${apiUrl}/oauth2/logout?logout_challenge=${challenge}`, {
         method: "POST",
       })

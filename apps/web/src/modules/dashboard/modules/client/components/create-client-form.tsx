@@ -19,6 +19,7 @@ import {
 import { Input } from "@workspace/ui/components/input"
 import { createClient } from "@/lib/services/client"
 import { toast } from "sonner"
+import RHFTextField from "@/components/common/rhf-text-field"
 
 const clientSchema = z.object({
   client_name: z.string().min(1, "Client name is required"),
@@ -40,7 +41,6 @@ const defaultValues: ClientFormValues = {
 
 export function CreateClientForm() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
 
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
@@ -66,7 +66,6 @@ export function CreateClientForm() {
   })
 
   async function onSubmit(data: ClientFormValues) {
-    setLoading(true)
     try {
       // Filter out empty URIs and map to string array
       const cleanedData = {
@@ -86,7 +85,7 @@ export function CreateClientForm() {
           type: "manual",
           message: "At least one redirect URI is required",
         })
-        setLoading(false)
+
         return
       }
 
@@ -107,7 +106,6 @@ export function CreateClientForm() {
       router.push(`/dashboard/clients/success?${params.toString()}`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to create client")
-      setLoading(false)
     }
   }
 
@@ -117,18 +115,11 @@ export function CreateClientForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-6 bg-card p-6 border rounded-lg"
       >
-        <FormField
-          control={form.control}
+        <RHFTextField
           name="client_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Client Name *</FormLabel>
-              <FormControl>
-                <Input placeholder="My Application" {...field} disabled={loading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Client Name"
+          placeholder="My Application"
+          disabled={form.formState.isSubmitting}
         />
 
         <div className="space-y-4">
@@ -147,7 +138,7 @@ export function CreateClientForm() {
                       <Input
                         placeholder="http://localhost:3001/callback"
                         {...field}
-                        disabled={loading}
+                        disabled={form.formState.isSubmitting}
                       />
                     </FormControl>
                     <FormMessage />
@@ -160,7 +151,7 @@ export function CreateClientForm() {
                   variant="outline"
                   size="icon"
                   onClick={() => removeRedirectUri(index)}
-                  disabled={loading}
+                  disabled={form.formState.isSubmitting}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -172,7 +163,7 @@ export function CreateClientForm() {
             variant="outline"
             size="sm"
             onClick={() => appendRedirectUri({ value: "" })}
-            disabled={loading}
+            disabled={form.formState.isSubmitting}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Redirect URI
@@ -195,7 +186,11 @@ export function CreateClientForm() {
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>
-                      <Input placeholder="http://localhost:3000" {...field} disabled={loading} />
+                      <Input
+                        placeholder="http://localhost:3000"
+                        {...field}
+                        disabled={form.formState.isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -207,7 +202,7 @@ export function CreateClientForm() {
                   variant="outline"
                   size="icon"
                   onClick={() => removePostLogoutUri(index)}
-                  disabled={loading}
+                  disabled={form.formState.isSubmitting}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -219,7 +214,7 @@ export function CreateClientForm() {
             variant="outline"
             size="sm"
             onClick={() => appendPostLogoutUri({ value: "" })}
-            disabled={loading}
+            disabled={form.formState.isSubmitting}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Post Logout URI
@@ -233,7 +228,11 @@ export function CreateClientForm() {
             <FormItem>
               <FormLabel>Scopes</FormLabel>
               <FormControl>
-                <Input placeholder="openid email profile" {...field} disabled={loading} />
+                <Input
+                  placeholder="openid email profile"
+                  {...field}
+                  disabled={form.formState.isSubmitting}
+                />
               </FormControl>
               <FormDescription>Space-separated list of scopes</FormDescription>
               <FormMessage />
@@ -252,7 +251,7 @@ export function CreateClientForm() {
                   <select
                     className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     {...field}
-                    disabled={loading}
+                    disabled={form.formState.isSubmitting}
                   >
                     <option value="none">
                       None (Public Client with PKCE) - Recommended for SPAs
@@ -273,14 +272,14 @@ export function CreateClientForm() {
         />
 
         <div className="flex gap-4 pt-4">
-          <Button type="submit" disabled={loading} className="flex-1">
-            {loading ? "Creating..." : "Create Client"}
+          <Button type="submit" disabled={form.formState.isSubmitting} className="flex-1">
+            {form.formState.isSubmitting ? "Creating..." : "Create Client"}
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboard")}
-            disabled={loading}
+            disabled={form.formState.isSubmitting}
           >
             Cancel
           </Button>

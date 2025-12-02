@@ -30,6 +30,7 @@
     "@repo/api": "workspace:*",
     "@types/express-session": "^1.18.2",
     "@types/jsonwebtoken": "^9.0.10",
+    "cookie-parser": "^1.4.7",
     "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "nestjs-zod": "^5.0.1",

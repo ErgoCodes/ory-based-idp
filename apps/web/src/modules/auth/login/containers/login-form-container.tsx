@@ -63,6 +63,12 @@ function LoginFormContainer() {
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4">
+            <Link
+              href={"/recovery/notify"}
+              className="ml-3 text-muted-foreground hover:underline hover:text-primary"
+            >
+              Forgot your password?
+            </Link>
             <RHFSubmitButton className="w-full" label="Sign In" />
 
             <div className="text-sm text-center text-muted-foreground">

@@ -7,6 +7,8 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  Res,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -30,6 +32,7 @@ import type {
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { Public } from '../common/decorators/public.decorator';
 import { ResultUtils } from '../common/result';
+import { Response, Request } from 'express';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -124,8 +127,6 @@ export class AuthController {
     );
     emailResult;
     if (!emailResult.success) {
-      Logger.log('emailResult');
-      Logger.log(emailResult);
       console.log('emailResult');
       console.log(emailResult);
       return emailResult;
@@ -187,6 +188,139 @@ export class AuthController {
     }
 
     return result;
+  }
+
+  /**
+   * Start password recovery flow
+   */
+  @Public()
+  @Post('recovery/start')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Start password recovery flow' })
+  async startRecovery(@Body('email') email: string) {
+    console.log('[Controller] Starting recovery for:', email);
+    const result = await this.kratosService.startRecovery(email);
+
+    if (!result.success) {
+      console.error('[Controller] Recovery start failed:', result.error);
+      return result;
+    }
+
+    console.log('[Controller] Recovery flow started:', result.value.flowId);
+    return result;
+  }
+
+  @Public()
+  @Post('recovery/complete')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Complete recovery with code' })
+  async completeRecoveryWithCode(
+    @Body('flowId') flowId: string,
+    @Body('code') code: string,
+    @Res() res: Response,
+  ) {
+    console.log(
+      '[Controller] Completing recovery. Flow:',
+      flowId,
+      'Code:',
+      code,
+    );
+    const result = await this.kratosService.completeRecoveryWithCode(
+      flowId,
+      code,
+    );
+
+    if (!result.success) {
+      console.error('[Controller] Recovery completion failed:', result.error);
+      return result;
+    }
+
+    console.log('[Controller] Recovery completed successfully');
+    const token = result.value.continueWith?.find(
+      (c) => c.action === 'set_ory_session_token',
+    )?.ory_session_token;
+    if (!token) {
+      return res.status(400).json({ error: 'No session token returned' });
+    }
+    console.log(token);
+    res.cookie('ory_session_token', token, {
+      httpOnly: true, // not accessible via JS
+      secure: process.env.NODE_ENV === 'production' ? true : false,
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 15, // 15 minutes
+    });
+    return res.json({ message: 'Recovery completed, session cookie set' });
+  }
+
+  @Public()
+  @Post('settings/flow/create')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Create a native settings flow' })
+  async createSettingsFlow(@Req() req: Request, @Res() res: Response) {
+    // Read the token from the cookie
+    const token = req.cookies['ory_session_token'];
+    console.log('[Controller] Creating settings flow with token:', token);
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ error: 'No session token found in cookies' });
+    }
+
+    const result = await this.kratosService.createSettingsFlow(token);
+
+    if (!result.success) {
+      console.error(
+        '[Controller] Settings flow creation failed:',
+        result.error,
+      );
+      return res.status(400).json(result);
+    }
+
+    console.log(
+      '[Controller] Settings flow created successfully:',
+      result.value.flowId,
+    );
+
+    // Return the flowId so the frontend can redirect to /settings?flow=<flowId>
+    return res.json({ flowId: result.value.flowId });
+  }
+
+  @Public()
+  @Post('settings/flow/complete')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Complete settings flow and change password' })
+  async completeSettingsFlow(
+    @Body('flowId') flowId: string,
+    @Body('password') password: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const token = req.cookies['ory_session_token'];
+    console.log('[Controller] Completing settings flow with flowId:', flowId);
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ error: 'No session token found in cookies' });
+    }
+
+    const result = await this.kratosService.completeSettingsFlow(
+      flowId,
+      password,
+      token,
+    );
+
+    if (!result.success) {
+      console.error(
+        '[Controller] Settings flow completion failed:',
+        result.error,
+      );
+      return res.status(400).json(result);
+    }
+
+    console.log('[Controller] Settings flow completed successfully');
+    return res.json({ success: true });
   }
 
   @Public()

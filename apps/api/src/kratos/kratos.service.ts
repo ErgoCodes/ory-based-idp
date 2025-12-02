@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { FrontendApi, IdentityApi, VerificationFlow } from '@ory/client-fetch';
+import {
+  FrontendApi,
+  IdentityApi,
+  VerificationFlow,
+  ContinueWith,
+} from '@ory/client-fetch';
 import { RegisterUser, Identity } from '@repo/api';
 import { Result, ResultUtils } from '../common/result';
 import { KratosError, KratosErrorHandler } from './kratos-error.handler';
@@ -421,6 +426,147 @@ export class KratosService {
         error as never,
         'create_superadmin',
         'Failed to create superadmin identity',
+      );
+      return ResultUtils.err(kratosError);
+    }
+  }
+  /**
+   * Start a password recovery flow
+   * This creates a new native recovery flow and sends the recovery email
+   */
+  async startRecovery(
+    email: string,
+  ): Promise<Result<{ flowId: string }, KratosError>> {
+    try {
+      const flow = await this.frontendApi.createNativeRecoveryFlow();
+      console.log('[startRecovery] Flow created:', flow);
+
+      // Submit the email to trigger recovery email
+      const response = await this.frontendApi.updateRecoveryFlow({
+        flow: flow.id,
+        updateRecoveryFlowBody: {
+          method: 'code',
+          email,
+        },
+      });
+
+      console.log('[startRecovery] updateRecoveryFlow response:', response);
+      console.log('[startRecovery] ui.messages:', response.ui.messages);
+
+      if (response?.id) {
+        console.log(
+          '[startRecovery] Recovery started successfully:',
+          response.id,
+        );
+        return ResultUtils.ok({ flowId: response.id });
+      }
+
+      console.warn('[startRecovery] No flow ID returned in response');
+      return ResultUtils.err({
+        code: 'recovery_failed',
+        message:
+          'Could not start recovery flow | [startRecovery] No flow ID returned in response',
+        statusCode: 500,
+      });
+    } catch (error) {
+      console.error('[startRecovery] Error:', error);
+      const kratosError = KratosErrorHandler.handle(
+        error as never,
+        'recovery_flow',
+        'Failed to start recovery flow',
+      );
+      return ResultUtils.err(kratosError);
+    }
+  }
+
+  async completeRecoveryWithCode(
+    flowId: string,
+    code: string,
+  ): Promise<
+    Result<
+      { success: boolean; continueWith: ContinueWith[] | undefined },
+      KratosError
+    >
+  > {
+    try {
+      const response = await this.frontendApi.updateRecoveryFlow({
+        flow: flowId,
+        updateRecoveryFlowBody: {
+          method: 'code',
+          code,
+        },
+      });
+
+      console.log('[completeRecoveryWithCode] Response:', response);
+      console.log(
+        '[completeRecoveryWithCode] Response.contune_with:',
+        response.continue_with,
+      );
+      const continueWith = response.continue_with;
+
+      if (response?.state === 'passed_challenge') {
+        console.log('[completeRecoveryWithCode] Recovery challenge passed');
+        return ResultUtils.ok({ success: true, continueWith });
+      }
+
+      console.warn(
+        '[completeRecoveryWithCode] Unexpected state:',
+        response?.state,
+      );
+      return ResultUtils.err({
+        code: 'invalid_code',
+        message: 'Recovery code is invalid or expired',
+        statusCode: 400,
+      });
+    } catch (error) {
+      console.error('[completeRecoveryWithCode] Error:', error);
+      const kratosError = KratosErrorHandler.handle(
+        error as never,
+        'recovery_flow',
+        'Failed to complete recovery with code',
+      );
+      return ResultUtils.err(kratosError);
+    }
+  }
+
+  async createSettingsFlow(
+    ory_recovery_token: string,
+  ): Promise<Result<{ flowId: string }, KratosError>> {
+    try {
+      const flow = await this.frontendApi.createNativeSettingsFlow({
+        xSessionToken: ory_recovery_token,
+      });
+      return ResultUtils.ok({ flowId: flow.id });
+    } catch (error) {
+      const kratosError = KratosErrorHandler.handle(
+        error as never,
+        'settings_flow',
+        'Failed to create settings flow',
+      );
+      return ResultUtils.err(kratosError);
+    }
+  }
+
+  async completeSettingsFlow(
+    flowId: string,
+    password: string,
+    ory_recovery_token: string,
+  ): Promise<Result<{ success: boolean }, KratosError>> {
+    try {
+      await this.frontendApi.updateSettingsFlow({
+        flow: flowId,
+        xSessionToken: ory_recovery_token,
+        updateSettingsFlowBody: {
+          method: 'password',
+          password,
+        },
+      });
+      return ResultUtils.ok({ success: true });
+    } catch (error) {
+      const kratosError = KratosErrorHandler.handle(
+        error as never,
+        'settings_flow',
+        'Failed to complete settings flow',
       );
       return ResultUtils.err(kratosError);
     }

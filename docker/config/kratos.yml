@@ -58,13 +58,23 @@ selfservice:
             - http://localhost:4455
 
   flows:
+    recovery:
+      enabled: true
+      lifespan: 120m # Defines how much time the user has to complete the recovery flow in the UI. Default: 1h.
+      use: code # Defines which method is used, one of 'code' or 'link'.
+      notify_unknown_recipients: false # Defines if the system sends attempted recovery notifications to unregistered addresse
+      ui_url: http://localhost:8362/recovery
+      after:
+        hooks:
+          - hook: revoke_active_sessions
+
     error:
       ui_url: http://localhost:4455/error
 
     settings:
       ui_url: http://localhost:4455/settings
       privileged_session_max_age: 15m
-      required_aal: highest_available
+      # required_aal: highest_available
 
     logout:
       after:
@@ -121,3 +131,6 @@ courier:
 
 oauth2_provider:
   url: http://hydra:4445
+
+feature_flags:
+  use_continue_with_transitions: true

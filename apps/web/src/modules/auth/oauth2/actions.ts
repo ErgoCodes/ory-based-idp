@@ -178,3 +178,37 @@ async function autoAcceptConsent(challenge: string, requestedScopes: string[]): 
   // Fallback: reload the page to show the consent UI
   redirect("/oauth2/consent?consent_challenge=" + challenge)
 }
+
+/**
+ * Handle logout request
+ */
+export async function handleLogout(challenge: string): Promise<never> {
+  if (!API_URL) {
+    redirect("/oauth2/logged-out")
+  }
+
+  if (!challenge) {
+    redirect("/oauth2/logged-out")
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/oauth2/logout?logout_challenge=${challenge}`, {
+      method: "POST",
+    })
+
+    if (!response.ok) {
+      redirect("/oauth2/logged-out")
+    }
+
+    const data = await response.json()
+
+    if (data.success && data.value.redirect_to) {
+      redirect(data.value.redirect_to)
+    }
+  } catch (error) {
+    console.error("Error handling logout:", error)
+  }
+
+  // Fallback: redirect to logged-out page
+  redirect("/oauth2/logged-out")
+}

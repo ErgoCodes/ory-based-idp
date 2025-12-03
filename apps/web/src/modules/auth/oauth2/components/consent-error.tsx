@@ -1,5 +1,3 @@
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert-dialog"
-
 interface ConsentErrorProps {
   error: string
 }

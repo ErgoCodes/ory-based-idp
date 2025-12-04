@@ -1,7 +1,7 @@
 import { fetchWithAuthServer } from "@/lib/api/client"
 import LoadingScreen from "@/components/common/loading-screen"
 import { ClientsList } from "../components/client-list"
-import { DashboardHeader } from "../components/dashboard-header"
+import { ClientsListHeader } from "../components/clients-list-header"
 import { EmptyState } from "../components/empty-state"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth/auth-config"
@@ -26,7 +26,7 @@ export async function DashboardView() {
 
   return (
     <div className="container mx-auto p-6">
-      <DashboardHeader total={data.length} />
+      <ClientsListHeader total={data.length} />
 
       {data.error && (
         <div className="mb-6 p-4 border border-destructive bg-destructive/10 rounded-md">

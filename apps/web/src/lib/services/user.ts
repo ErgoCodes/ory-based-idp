@@ -2,6 +2,7 @@
 
 import { fetchWithAuthServer } from "@/lib/api/client"
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 export interface UserProfile {
   id: string
@@ -61,4 +62,77 @@ export async function changeUserPassword(data: {
   }
 
   return response.json()
+}
+
+export interface UserUpdateData {
+  name: {
+    first: string
+    last: string
+  }
+  email: string
+  role: "user" | "superadmin"
+}
+
+export async function updateUserAction(userId: string, data: UserUpdateData) {
+  try {
+    const response = await fetchWithAuthServer(`/admin/users/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      return {
+        success: false,
+        error: errorData.error?.message || "Failed to update user",
+      }
+    }
+
+    revalidatePath(`/dashboard/users/${userId}`)
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update user",
+    }
+  }
+}
+
+export async function deleteUserAction(userId: string) {
+  try {
+    const response = await fetchWithAuthServer(`/admin/users/${userId}`, {
+      method: "DELETE",
+    })
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: "Failed to delete user",
+      }
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete user",
+    }
+  }
+
+  revalidatePath("/dashboard/users")
+  redirect("/dashboard/users")
+}
+
+export async function getUser(id: string) {
+  try {
+    const response = await fetchWithAuthServer(`/admin/users/${id}`)
+
+    if (!response.ok) {
+      if (response.status === 404) return null
+      throw new Error("Failed to fetch user")
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error("Error fetching user:", error)
+    throw error
+  }
 }

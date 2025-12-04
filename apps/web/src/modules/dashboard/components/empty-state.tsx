@@ -1,19 +1,44 @@
 import { Button } from "@workspace/ui/components/button"
-import { Plus } from "lucide-react"
+import { Shield, Plus, FileText } from "lucide-react"
 import Link from "next/link"
+
 type EmptyStateProps = {
   createLink: string
 }
+
 export function EmptyState({ createLink }: EmptyStateProps) {
   return (
-    <div className="text-center py-12 bg-card border rounded-lg">
-      <p className="text-muted-foreground mb-4">No clients registered yet</p>
-      <Button>
-        <Link href={createLink} className="flex flex-row items-center">
-          <Plus className="h-4 w-4 mr-2" />
-          Create your first client
-        </Link>
-      </Button>
+    <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="relative mb-6">
+        {/* Icon with decorative background */}
+        <div className="absolute inset-0 bg-primary/5 rounded-full blur-2xl" />
+        <div className="relative p-6 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20">
+          <Shield className="h-16 w-16 text-primary" />
+        </div>
+      </div>
+
+      <div className="text-center space-y-3 mb-6 max-w-md">
+        <h3 className="text-2xl font-bold tracking-tight">No OAuth2 Clients Yet</h3>
+        <p className="text-muted-foreground">
+          Get started by creating your first OAuth2 client to enable secure authentication for your
+          applications.
+        </p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Button asChild size="lg">
+          <Link href={createLink} className="gap-2">
+            <Plus className="h-5 w-5" />
+            Create Your First Client
+          </Link>
+        </Button>
+        <Button variant="outline" size="lg" asChild>
+          <Link href="/docs/oauth2" className="gap-2">
+            <FileText className="h-5 w-5" />
+            View Documentation
+          </Link>
+        </Button>
+      </div>
     </div>
   )
 }

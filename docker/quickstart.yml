@@ -47,12 +47,24 @@ services:
   kratos:
     depends_on:
       - kratos-migrate
+    env_file:
+      - .env
     image: oryd/kratos:v25.4.0
     ports:
       - "4433:4433"
       - "4434:4434"
     environment:
-      - DSN=postgres://admin:secret@postgres:5432/kratos_db?sslmode=disable
+      - DSN=${DSN}
+      - METHODS_CODE_CONFIG_LIFESPAN=${METHODS_CODE_CONFIG_LIFESPAN}
+      - METHODS_PASSWORD_CONFIG_MIN_PASSWORD_LENGTH=${METHODS_PASSWORD_CONFIG_MIN_PASSWORD_LENGTH}
+      - FLOWS_SETTINGS_PRIVILEGED_SESSION_MAX_AGE=${FLOWS_SETTINGS_PRIVILEGED_SESSION_MAX_AGE}
+      - FLOWS_SETTINGS_VERIFICATION_LIFESPAN=${FLOWS_SETTINGS_VERIFICATION_LIFESPAN}
+      - FLOWS_RECOVERY_LIFESPAN=${FLOWS_RECOVERY_LIFESPAN}
+      - SECRETS_COOKIE=${SECRETS_COOKIE}
+      - SECRETS_CIPHER=${SECRETS_CIPHER}
+      - COURIER_SMTP_CONNECTION_URI=${COURIER_SMTP_CONNECTION_URI}
+      - COURIER_SMTP_FROM_ADDRESS=${COURIER_SMTP_FROM_ADDRESS}
+      - COURIER_SMTP_FROM_NAME=${COURIER_SMTP_FROM_NAME}
       - LOG_LEVEL=trace
     command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
     volumes:

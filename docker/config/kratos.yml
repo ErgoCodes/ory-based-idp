@@ -1,7 +1,5 @@
 version: v1.2.0
 
-dsn: postgres://admin:secret@postgres:5432/kratos_db?sslmode=disable
-
 serve:
   public:
     base_url: http://localhost:4433
@@ -18,13 +16,9 @@ selfservice:
   methods:
     code: # or link
       enabled: true
-      config:
-        # Defines how long the verification or the recovery code is valid for (default 1h)
-        lifespan: 120m
     password:
       enabled: true
       config:
-        min_password_length: 6
         identifier_similarity_check_enabled: false
         haveibeenpwned_enabled: false
     oidc:
@@ -60,7 +54,6 @@ selfservice:
   flows:
     recovery:
       enabled: true
-      lifespan: 120m # Defines how much time the user has to complete the recovery flow in the UI. Default: 1h.
       use: code # Defines which method is used, one of 'code' or 'link'.
       notify_unknown_recipients: false # Defines if the system sends attempted recovery notifications to unregistered addresse
       ui_url: http://localhost:8362/recovery
@@ -73,7 +66,6 @@ selfservice:
 
     settings:
       ui_url: http://localhost:4455/settings
-      privileged_session_max_age: 15m
       # required_aal: highest_available
 
     logout:
@@ -91,11 +83,6 @@ selfservice:
       use: code # Defines which method is used, one of 'code' or 'link'.
       enabled: true
 
-      # Defines how long the verification flow (the UI interaction, not the link!)
-      # is valid for (default 1h)
-      lifespan: 120m
-
-      # Whether to notify unknown addresses, if verification is requested for them
       notify_unknown_recipients: false
 
     registration:
@@ -111,23 +98,11 @@ log:
   format: text
   leak_sensitive_values: true
 
-secrets:
-  cookie:
-    - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
-  cipher:
-    - 32-LONG-SECRET-NOT-SECURE-AT-ALL
-
 identity:
   default_schema_id: default
   schemas:
     - id: default
       url: file:///etc/config/kratos/identity.schema.json
-
-courier:
-  smtp:
-    connection_uri: "smtp://carlos.rrt@avangenio.com:CRrt01072481687%2A@correo.avangenio.com:587/"
-    from_address: "carlos.rrt@avangenio.com"
-    from_name: "IDP"
 
 oauth2_provider:
   url: http://hydra:4445

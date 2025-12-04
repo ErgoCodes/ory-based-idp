@@ -33,7 +33,7 @@ export default async function UserDetailsPage({ params }: UserDetailsPageProps) 
   return (
     <>
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-5xl">
         <Suspense fallback={<div>Loading...</div>}>
           <UserDetailsView user={user} currentUserId={session.user.id} />
         </Suspense>

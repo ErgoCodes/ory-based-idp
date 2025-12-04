@@ -1,5 +1,3 @@
-"use client"
-
 import {
   Card,
   CardHeader,
@@ -7,8 +5,8 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "../../../../../../packages/ui/src/components/card"
-import { Button } from "../../../../../../packages/ui/src/components/button"
+} from "@workspace/ui/components/card"
+import { Button } from "@workspace/ui/components/button"
 import Link from "next/link"
 
 export default function VerificationNoticePage() {

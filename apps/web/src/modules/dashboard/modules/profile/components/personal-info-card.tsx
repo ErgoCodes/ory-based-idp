@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Loader2 } from "lucide-react"
+import { Loader2, Mail, User as UserIcon, Shield, Calendar, Edit2, Check, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@workspace/ui/components/button"
@@ -26,6 +26,7 @@ import {
 } from "@workspace/ui/components/form"
 import { Input } from "@workspace/ui/components/input"
 import { updateUserProfile, type UserProfile } from "@/lib/services/user"
+import { Separator } from "@workspace/ui/components/separator"
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -70,44 +71,64 @@ export function PersonalInfoCard({ initialProfile }: PersonalInfoCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Personal Information</CardTitle>
-        <CardDescription>Update your personal details and contact information.</CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Personal Information</CardTitle>
+            <CardDescription>Manage your personal details and contact information.</CardDescription>
+          </div>
+          {!isEditing && (
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Edit2 className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {!isEditing ? (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-muted-foreground">Full Name</Label>
-                <p className="font-medium">
-                  {initialProfile.traits.name
-                    ? `${initialProfile.traits.name.first} ${initialProfile.traits.name.last}`
-                    : "Not set"}
-                </p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Email</Label>
-                <p className="font-medium">{initialProfile.traits.email}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Role</Label>
-                <p className="font-medium capitalize">{initialProfile.traits.role}</p>
-              </div>
-              {initialProfile.created_at && (
-                <div>
-                  <Label className="text-muted-foreground">Member Since</Label>
-                  <p className="font-medium">
-                    {new Date(initialProfile.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
-            </div>
-            <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+            <InfoItem
+              icon={<UserIcon className="h-4 w-4" />}
+              label="First Name"
+              value={initialProfile.traits.name?.first || "Not set"}
+            />
+            <Separator />
+            <InfoItem
+              icon={<UserIcon className="h-4 w-4" />}
+              label="Last Name"
+              value={initialProfile.traits.name?.last || "Not set"}
+            />
+            <Separator />
+            <InfoItem
+              icon={<Mail className="h-4 w-4" />}
+              label="Email Address"
+              value={initialProfile.traits.email}
+            />
+            <Separator />
+            <InfoItem
+              icon={<Shield className="h-4 w-4" />}
+              label="Role"
+              value={<span className="capitalize font-medium">{initialProfile.traits.role}</span>}
+            />
+            {initialProfile.created_at && (
+              <>
+                <Separator />
+                <InfoItem
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Member Since"
+                  value={new Date(initialProfile.created_at).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                />
+              </>
+            )}
           </div>
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="firstName"
@@ -115,7 +136,7 @@ export function PersonalInfoCard({ initialProfile }: PersonalInfoCardProps) {
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input placeholder="John" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -128,7 +149,7 @@ export function PersonalInfoCard({ initialProfile }: PersonalInfoCardProps) {
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input placeholder="Doe" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -140,25 +161,30 @@ export function PersonalInfoCard({ initialProfile }: PersonalInfoCardProps) {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input {...field} type="email" />
+                      <Input placeholder="john.doe@example.com" type="email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-2">
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Check className="mr-2 h-4 w-4" />
                   Save Changes
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false)
+                    form.reset()
+                  }}
                   disabled={form.formState.isSubmitting}
                 >
+                  <X className="mr-2 h-4 w-4" />
                   Cancel
                 </Button>
               </div>
@@ -170,13 +196,22 @@ export function PersonalInfoCard({ initialProfile }: PersonalInfoCardProps) {
   )
 }
 
-function Label({ className, children, ...props }: React.ComponentProps<"label">) {
+function InfoItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: React.ReactNode
+}) {
   return (
-    <label
-      className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}
-      {...props}
-    >
-      {children}
-    </label>
+    <div className="flex items-center justify-between py-2">
+      <div className="flex items-center gap-3">
+        <div className="text-muted-foreground">{icon}</div>
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      </div>
+      <div className="text-sm font-medium">{value}</div>
+    </div>
   )
 }

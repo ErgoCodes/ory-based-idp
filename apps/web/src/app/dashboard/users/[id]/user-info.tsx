@@ -1,3 +1,5 @@
+"use client"
+
 import { Badge } from "@workspace/ui/components/badge"
 import {
   Card,
@@ -6,9 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card"
-import { Label } from "@workspace/ui/components/label"
-import { Separator } from "@workspace/ui/components/separator"
 import { Button } from "@workspace/ui/components/button"
+import { Separator } from "@workspace/ui/components/separator"
+import { User as UserIcon, Mail, Shield, Hash, Calendar, Clock, Edit2 } from "lucide-react"
 
 interface UserProfile {
   id: string
@@ -38,56 +40,103 @@ export function UserInfo({ user, onEdit }: UserInfoProps) {
             <CardTitle>User Information</CardTitle>
             <CardDescription>View and manage user details</CardDescription>
           </div>
-          <Button onClick={onEdit}>Edit User</Button>
+          <Button onClick={onEdit} size="sm" className="gap-2">
+            <Edit2 className="h-4 w-4" />
+            Edit User
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <Label className="text-muted-foreground">Full Name</Label>
-              <p className="font-medium">
-                {user.traits.name
-                  ? `${user.traits.name.first} ${user.traits.name.last}`
-                  : "Not set"}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-muted-foreground">Email</Label>
-              <p className="font-medium">{user.traits.email}</p>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-muted-foreground">Role</Label>
-              <div>
-                <Badge variant={user.traits.role === "superadmin" ? "default" : "secondary"}>
-                  {user.traits.role}
-                </Badge>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-muted-foreground">User ID</Label>
-              <p className="font-mono text-sm text-muted-foreground">{user.id}</p>
-            </div>
-          </div>
-
+        <div className="space-y-4">
+          <InfoItem
+            icon={<UserIcon className="h-4 w-4" />}
+            label="First Name"
+            value={user.traits.name?.first || "Not set"}
+          />
           <Separator />
+          <InfoItem
+            icon={<UserIcon className="h-4 w-4" />}
+            label="Last Name"
+            value={user.traits.name?.last || "Not set"}
+          />
+          <Separator />
+          <InfoItem
+            icon={<Mail className="h-4 w-4" />}
+            label="Email Address"
+            value={user.traits.email}
+          />
+          <Separator />
+          <InfoItem
+            icon={<Shield className="h-4 w-4" />}
+            label="Role"
+            value={
+              <Badge variant={user.traits.role === "superadmin" ? "default" : "secondary"}>
+                {user.traits.role === "superadmin" ? "Super Admin" : "User"}
+              </Badge>
+            }
+          />
+          <Separator />
+          <InfoItem
+            icon={<Hash className="h-4 w-4" />}
+            label="User ID"
+            value={<span className="font-mono text-xs">{user.id}</span>}
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            {user.created_at && (
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">Created At</Label>
-                <p>{new Date(user.created_at).toLocaleString()}</p>
+          {(user.created_at || user.updated_at) && (
+            <>
+              <Separator className="my-6" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {user.created_at && (
+                  <InfoItem
+                    icon={<Calendar className="h-4 w-4" />}
+                    label="Created At"
+                    value={new Date(user.created_at).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  />
+                )}
+                {user.updated_at && (
+                  <InfoItem
+                    icon={<Clock className="h-4 w-4" />}
+                    label="Last Updated"
+                    value={new Date(user.updated_at).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  />
+                )}
               </div>
-            )}
-            {user.updated_at && (
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">Last Updated</Label>
-                <p>{new Date(user.updated_at).toLocaleString()}</p>
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+function InfoItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: React.ReactNode
+}) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <div className="flex items-center gap-3">
+        <div className="text-muted-foreground">{icon}</div>
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      </div>
+      <div className="text-sm font-medium">{value}</div>
+    </div>
   )
 }

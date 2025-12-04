@@ -11,8 +11,8 @@ interface ProfileViewProps {
 
 export function ProfileView({ initialProfile }: ProfileViewProps) {
   return (
-    <div className="container max-w-4xl py-6 space-y-8 mx-auto">
-      <ProfileHeader />
+    <div className="container max-w-5xl py-8 space-y-8 mx-auto">
+      <ProfileHeader profile={initialProfile} />
 
       <div className="grid gap-6">
         <PersonalInfoCard initialProfile={initialProfile} />

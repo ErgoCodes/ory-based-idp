@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Loader2 } from "lucide-react"
+import { Loader2, Lock, Shield, Eye, EyeOff, Check, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@workspace/ui/components/button"
@@ -22,11 +22,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@workspace/ui/components/form"
 import { Input } from "@workspace/ui/components/input"
 import { changeUserPassword } from "@/lib/services/user"
-import RHFTextField from "@/components/common/rhf-text-field"
-import RHFSubmitButton from "@/components/common/rhf-submit-button"
+import { Separator } from "@workspace/ui/components/separator"
 
 const passwordSchema = z
   .object({
@@ -41,6 +41,11 @@ const passwordSchema = z
 
 export function SecurityCard() {
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  })
 
   const form = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
@@ -62,47 +67,164 @@ export function SecurityCard() {
     }
   }
 
+  const togglePasswordVisibility = (field: "current" | "new" | "confirm") => {
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }))
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Security</CardTitle>
-        <CardDescription>Manage your password and security settings.</CardDescription>
+        <div className="flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          <div>
+            <CardTitle>Security</CardTitle>
+            <CardDescription>Manage your password and security settings.</CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {!isChangingPassword ? (
-          <Button variant="outline" onClick={() => setIsChangingPassword(true)}>
-            Change Password
-          </Button>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3">
+                <div className="text-muted-foreground">
+                  <Lock className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Password</p>
+                  <p className="text-xs text-muted-foreground">Last changed recently</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setIsChangingPassword(true)}>
+                Change Password
+              </Button>
+            </div>
+          </div>
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <RHFTextField
+              <FormField
+                control={form.control}
                 name="currentPassword"
-                label="Current Password"
-                type="password"
-                useCase="password"
-                placeholder="Enter your current password"
-                required
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showPasswords.current ? "text" : "password"}
+                          placeholder="Enter your current password"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => togglePasswordVisibility("current")}
+                        >
+                          {showPasswords.current ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <div className="grid grid-cols-2 gap-4">
-                <RHFTextField
+
+              <Separator />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
                   name="newPassword"
-                  label="New Password"
-                  type="password"
-                  useCase="password"
-                  placeholder="Enter your new password"
-                  required
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={showPasswords.new ? "text" : "password"}
+                            placeholder="Enter new password"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => togglePasswordVisibility("new")}
+                          >
+                            {showPasswords.new ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormDescription>Must be at least 8 characters</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <RHFTextField
+                <FormField
+                  control={form.control}
                   name="confirmPassword"
-                  label="Confirm Password"
-                  type="password"
-                  useCase="password"
-                  placeholder="Confirm your new password"
-                  required
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={showPasswords.confirm ? "text" : "password"}
+                            placeholder="Confirm new password"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => togglePasswordVisibility("confirm")}
+                          >
+                            {showPasswords.confirm ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-              <RHFSubmitButton label="Update Password" />
+
+              <div className="flex gap-2 pt-2">
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Check className="mr-2 h-4 w-4" />
+                  Update Password
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsChangingPassword(false)
+                    form.reset()
+                  }}
+                  disabled={form.formState.isSubmitting}
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
+                </Button>
+              </div>
             </form>
           </Form>
         )}

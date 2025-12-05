@@ -9,7 +9,7 @@
 
 ## 🎯 Project Description
 
-**Ory-Based Identity Provider** is a complete, production-ready authentication and authorization solution that combines the power of Ory Kratos (identity management) and Ory Hydra (OAuth2/OIDC server) with a modern tech stack. This project provides an open-source alternative to commercial solutions like Auth0, Okta, or AWS Cognito.
+**Ory-Based Identity Provider** is a complete, production-ready authentication and authorization solution that combines the power of Ory Kratos (identity management) and Ory Hydra (OAuth2/OIDC server) with a modern tech stack. This project provides an open-source alternative to commercial solutions.
 
 ### Problem Solved
 
@@ -26,7 +26,6 @@ A self-hosted, fully customizable identity provider that offers:
 
 - ✅ Complete OAuth2/OIDC compliance
 - ✅ Role-Based Access Control (RBAC) out of the box
-- ✅ Modern admin dashboard for user and client management
 - ✅ Production-ready architecture
 - ✅ Zero licensing costs
 - ✅ Full data ownership
@@ -35,7 +34,7 @@ A self-hosted, fully customizable identity provider that offers:
 
 **For Companies:**
 
-- **Cost Savings**: Eliminate monthly fees (Auth0 starts at $240/month)
+- **Cost Savings**: Eliminate monthly fees
 - **Reusability**: Use across multiple projects and microservices
 - **Customization**: Adapt to specific business needs
 - **Compliance**: Keep sensitive data in-house
@@ -49,7 +48,12 @@ A self-hosted, fully customizable identity provider that offers:
 
 ## 👥 Team Members
 
-- Falta por poner
+- Andy Alvarez Lujardo
+- Carlos Raúl Robinson Thompson
+- José Carlos Vilaseca Illnait
+- Sergio Manuel Mir Sánchez
+
+**Repository**: [https://github.com/ErgoCodes/ory-based-idp](https://github.com/ErgoCodes/ory-based-idp)
 
 ## ✨ Key Features
 
@@ -170,12 +174,6 @@ A self-hosted, fully customizable identity provider that offers:
 - Ory Kratos (identity provider)
 - Ory Hydra (OAuth2 server)
 
-**DevOps:**
-
-- Turborepo (monorepo management)
-- pnpm (package manager)
-- ESLint & Prettier (code quality)
-
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -189,7 +187,7 @@ A self-hosted, fully customizable identity provider that offers:
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/ory-based-idp.git
+git clone https://github.com/ErgoCodes/ory-based-idp.git
 cd ory-based-idp
 ```
 
@@ -199,21 +197,14 @@ cd ory-based-idp
 pnpm install
 ```
 
-3. **Start Ory services with Docker**
+3. **Configure environment variables**
+
+Before starting the services, you need to configure the environment variables:
 
 ```bash
-docker-compose -f docker/quickstart.yml up -d
-```
+# Docker services (Kratos, Hydra, PostgreSQL)
+cp docker/.env.example docker/.env
 
-This will start:
-
-- Ory Kratos (ports 4433, 4434)
-- Ory Hydra (ports 4444, 4445)
-- PostgreSQL (port 5432)
-
-4. **Configure environment variables**
-
-```bash
 # Backend API
 cp apps/api/.env.example apps/api/.env
 
@@ -224,41 +215,139 @@ cp apps/web/.env.local.example apps/web/.env.local
 cp apps/client-oauth2-demo/.env.local.example apps/client-oauth2-demo/.env.local
 ```
 
-5. **Start the backend API**
+**Important**: Edit `docker/.env` and configure your SMTP settings for email functionality:
 
 ```bash
-cd apps/api
-pnpm run dev
+# Example SMTP configuration for Gmail
+COURIER_SMTP_CONNECTION_URI=smtp://your-email@gmail.com:your-app-password@smtp.gmail.com:587/
+COURIER_SMTP_FROM_ADDRESS=your-email@gmail.com
+COURIER_SMTP_FROM_NAME=Your App Name
+
+# Generate strong secrets for production (use: openssl rand -hex 32)
+SECRETS_COOKIE=your-generated-secret-here
+SECRETS_CIPHER=your-generated-secret-here
 ```
 
-The API will be available at `http://localhost:3000`
+See the [Environment Variables](#-environment-variables) section for detailed configuration.
 
-6. **Start the admin dashboard**
+4. **Start infrastructure services**
 
 ```bash
-cd apps/web
-pnpm run dev
+pnpm infra:up
 ```
 
-The dashboard will be available at `http://localhost:3001`
+This will start:
 
-7. **(Optional) Start the OAuth2 demo client**
+- Ory Kratos (ports 4433, 4434)
+- Ory Hydra (ports 4444, 4445)
+- PostgreSQL (port 5432)
+
+5. **Start all applications**
+
+From the root directory, run:
 
 ```bash
-cd apps/client-oauth2-demo
-pnpm run dev
+pnpm dev
 ```
 
-The demo client will be available at `http://localhost:8363`
+This single command will start all applications in parallel:
+
+- Backend API at `http://localhost:3000`
+- Admin Dashboard at `http://localhost:8362`
+- OAuth2 Demo Client at `http://localhost:8363`
+
+**Alternative**: Start applications individually if needed:
+
+```bash
+# Backend API only
+cd apps/api && pnpm run dev
+
+# Admin Dashboard only
+cd apps/web && pnpm run dev
+
+# OAuth2 Demo Client only
+cd apps/client-oauth2-demo && pnpm run dev
+```
 
 ### First Login
 
 The system automatically creates a default superadmin account:
 
 - **Email**: `admin@example.com`
-- **Password**: `admin123`
+- **Password**: `changeme123`
 
 ⚠️ **IMPORTANT**: Change the password immediately after first login!
+
+## 🔧 Environment Variables
+
+### Docker Services (`docker/.env`)
+
+These variables configure Ory Kratos, Ory Hydra, and PostgreSQL:
+
+| Variable                                      | Description                          | Example                                                           | Required |
+| --------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- | -------- |
+| `DSN`                                         | PostgreSQL connection string         | `postgres://admin:secret@postgres:5432/kratos_db?sslmode=disable` | ✅       |
+| `SECRETS_COOKIE`                              | Cookie encryption secret (32+ chars) | Generate with `openssl rand -hex 32`                              | ✅       |
+| `SECRETS_CIPHER`                              | Cipher encryption secret (32+ chars) | Generate with `openssl rand -hex 32`                              | ✅       |
+| `COURIER_SMTP_CONNECTION_URI`                 | SMTP server for emails               | `smtp://user:pass@smtp.gmail.com:587/`                            | ✅       |
+| `COURIER_SMTP_FROM_ADDRESS`                   | Sender email address                 | `noreply@example.com`                                             | ✅       |
+| `COURIER_SMTP_FROM_NAME`                      | Sender display name                  | `Your App Name`                                                   | ✅       |
+| `KRATOS_PUBLIC_PORT`                          | Kratos public API port               | `4433`                                                            | ✅       |
+| `KRATOS_ADMIN_PORT`                           | Kratos admin API port                | `4434`                                                            | ✅       |
+| `METHODS_CODE_CONFIG_LIFESPAN`                | Verification code validity           | `120m`                                                            | ❌       |
+| `METHODS_PASSWORD_CONFIG_MIN_PASSWORD_LENGTH` | Min password length                  | `6`                                                               | ❌       |
+| `FLOWS_RECOVERY_LIFESPAN`                     | Recovery flow validity               | `120m`                                                            | ❌       |
+| `FLOWS_SETTINGS_PRIVILEGED_SESSION_MAX_AGE`   | Privileged session duration          | `15m`                                                             | ❌       |
+| `FLOWS_SETTINGS_VERIFICATION_LIFESPAN`        | Verification flow validity           | `120m`                                                            | ❌       |
+
+**SMTP Configuration Examples:**
+
+```bash
+# Gmail (requires App Password)
+COURIER_SMTP_CONNECTION_URI=smtp://your-email@gmail.com:your-app-password@smtp.gmail.com:587/
+
+# Outlook/Hotmail
+COURIER_SMTP_CONNECTION_URI=smtp://your-email@outlook.com:your-password@smtp-mail.outlook.com:587/
+
+# Custom SMTP (URL-encode special characters in password)
+COURIER_SMTP_CONNECTION_URI=smtp://username:password@smtp.example.com:587/
+```
+
+### Backend API (`apps/api/.env`)
+
+| Variable              | Description            | Example                                 | Required |
+| --------------------- | ---------------------- | --------------------------------------- | -------- |
+| `PORT`                | API server port        | `3000`                                  | ❌       |
+| `NODE_ENV`            | Environment mode       | `development` or `production`           | ✅       |
+| `KRATOS_PUBLIC_URL`   | Kratos public API URL  | `http://localhost:4433`                 | ✅       |
+| `KRATOS_ADMIN_URL`    | Kratos admin API URL   | `http://localhost:4434`                 | ✅       |
+| `HYDRA_ADMIN_URL`     | Hydra admin API URL    | `http://localhost:4445`                 | ✅       |
+| `JWT_SECRET`          | JWT signing secret     | Generate with `openssl rand -base64 32` | ✅       |
+| `JWT_EXPIRES_IN`      | JWT token expiration   | `1h`                                    | ❌       |
+| `SUPERADMIN_EMAIL`    | Default admin email    | `admin@example.com`                     | ✅       |
+| `SUPERADMIN_PASSWORD` | Default admin password | `admin123`                              | ✅       |
+
+### Admin Dashboard (`apps/web/.env.local`)
+
+| Variable              | Description                | Example                                 | Required |
+| --------------------- | -------------------------- | --------------------------------------- | -------- |
+| `NEXTAUTH_URL`        | Application URL            | `http://localhost:8362`                 | ✅       |
+| `NEXTAUTH_SECRET`     | NextAuth encryption secret | Generate with `openssl rand -base64 32` | ✅       |
+| `NEXT_PUBLIC_API_URL` | Backend API URL            | `http://localhost:3000`                 | ✅       |
+
+### OAuth2 Demo Client (`apps/client-oauth2-demo/.env.local`)
+
+| Variable                                    | Description                | Example                                 | Required |
+| ------------------------------------------- | -------------------------- | --------------------------------------- | -------- |
+| `NEXTAUTH_URL`                              | Demo app URL               | `http://localhost:8363`                 | ✅       |
+| `NEXTAUTH_SECRET`                           | NextAuth encryption secret | Generate with `openssl rand -base64 32` | ✅       |
+| `NEXT_PUBLIC_OAUTH2_AUTHORIZATION_ENDPOINT` | OAuth2 auth endpoint       | `http://localhost:4444/oauth2/auth`     | ✅       |
+| `NEXT_PUBLIC_OAUTH2_SCOPE`                  | OAuth2 scopes              | `openid email profile offline_access`   | ✅       |
+| `NEXT_PUBLIC_OAUTH2_USERINFO_ENDPOINT`      | Userinfo endpoint          | `http://localhost:4444/userinfo`        | ✅       |
+| `OAUTH2_CLIENT_ID`                          | OAuth2 client ID           | Get from admin dashboard                | ✅       |
+| `OAUTH2_TOKEN_ENDPOINT`                     | Token endpoint             | `http://localhost:4444/oauth2/token`    | ✅       |
+
+**Note**: The `OAUTH2_CLIENT_ID` must be created in the admin dashboard first. See [Managing OAuth2 Clients](#2-managing-oauth2-clients).
 
 ## 📖 Usage Guide
 
@@ -266,7 +355,7 @@ The system automatically creates a default superadmin account:
 
 #### 1. Managing Users
 
-1. Login to the admin dashboard at `http://localhost:3001`
+1. Login to the admin dashboard at `http://localhost:8362`
 2. Navigate to **Users** in the sidebar
 3. View all registered users
 4. Click on a user to:
@@ -300,8 +389,10 @@ The system automatically creates a default superadmin account:
 
 2. **Configure your application** with the client credentials:
 
+**Option A: Using PKCE (Recommended for public clients - no client secret needed)**
+
 ```typescript
-// Example with NextAuth.js
+// Example with NextAuth.js using PKCE
 import { OAuthConfig } from "next-auth/providers"
 
 export const HydraProvider: OAuthConfig<any> = {
@@ -315,11 +406,40 @@ export const HydraProvider: OAuthConfig<any> = {
   token: "http://localhost:4444/oauth2/token",
   userinfo: "http://localhost:4444/userinfo",
   clientId: process.env.OAUTH2_CLIENT_ID,
-  clientSecret: process.env.OAUTH2_CLIENT_SECRET,
+  clientSecret: "", // Empty string for PKCE (public clients)
+  checks: ["pkce", "state"], // Enable PKCE
 }
 ```
 
-3. **Implement the OAuth2 flow** in your application (see `apps/client-oauth2-demo` for a complete example)
+**Option B: Using Client Secret (for confidential clients)**
+
+```typescript
+// Example with NextAuth.js using client secret
+import { OAuthConfig } from "next-auth/providers"
+
+export const HydraProvider: OAuthConfig<any> = {
+  id: "hydra",
+  name: "Hydra",
+  type: "oauth",
+  authorization: {
+    url: "http://localhost:4444/oauth2/auth",
+    params: { scope: "openid email profile offline_access" },
+  },
+  token: "http://localhost:4444/oauth2/token",
+  userinfo: "http://localhost:4444/userinfo",
+  clientId: process.env.OAUTH2_CLIENT_ID,
+  clientSecret: process.env.OAUTH2_CLIENT_SECRET, // Required for confidential clients
+}
+```
+
+**Note**: When creating the OAuth2 client in the admin dashboard:
+
+- Select **"None"** as the token endpoint authentication method for PKCE (public clients)
+- Select **"Client Secret (Basic/Post)"** if you want to use a client secret (confidential clients)
+- PKCE is more secure for browser-based applications (SPAs, mobile apps)
+- Client secrets should only be used in server-side applications where the secret can be kept secure
+
+3. **Implement the OAuth2 flow** in your application (see `apps/client-oauth2-demo` for a complete PKCE example)
 
 #### API Endpoints
 
@@ -357,7 +477,7 @@ export const HydraProvider: OAuthConfig<any> = {
 - `POST /oauth2/consent` - Process consent
 - `POST /oauth2/logout` - OAuth2 logout
 
-Full API documentation available at `http://localhost:3000/api` (Swagger UI)
+Full API documentation available at `http://localhost:3000/api/docs` (Swagger UI)
 
 ## 🔒 Security
 
@@ -466,95 +586,45 @@ ory-based-idp/
 └── README.md                         # This file
 ```
 
-## 🧪 Testing
+## 📜 Available Scripts
 
-### Running Tests
-
-```bash
-# Unit tests
-pnpm test
-
-# E2E tests
-pnpm test:e2e
-
-# Test coverage
-pnpm test:cov
-```
-
-### Manual Testing
-
-1. **Test OAuth2 Flow**
-   - Start all services
-   - Navigate to `http://localhost:8363` (demo client)
-   - Click "Sign in with OAuth2"
-   - Complete the authorization flow
-   - Verify you're redirected back with user info
-
-2. **Test RBAC**
-   - Login as superadmin
-   - Verify access to Users and Clients pages
-   - Create a regular user
-   - Login as regular user
-   - Verify restricted access (no Users/Clients pages)
-
-## 🚢 Deployment
-
-### Docker Production Build
+From the root directory:
 
 ```bash
-# Build production images
-docker-compose -f docker/production.yml build
+# Start all applications in development mode
+pnpm dev
 
-# Start services
-docker-compose -f docker/production.yml up -d
+# Start infrastructure services (Kratos, Hydra, PostgreSQL)
+pnpm infra:up
+
+# Stop infrastructure services
+pnpm infra:down
+
+# Build all applications for production
+pnpm build
+
+# Run linting
+pnpm lint
+
+# Format code
+pnpm format
 ```
 
-### Environment Variables for Production
+From individual app directories (`apps/api`, `apps/web`, `apps/client-oauth2-demo`):
 
 ```bash
-# Backend
-JWT_SECRET=<strong-random-secret-256-bits>
-SUPERADMIN_EMAIL=admin@yourdomain.com
-SUPERADMIN_PASSWORD=<strong-password>
-NODE_ENV=production
+# Start in development mode
+pnpm run dev
 
-# Frontend
-NEXTAUTH_SECRET=<strong-random-secret>
-NEXTAUTH_URL=https://yourdomain.com
-NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+# Build for production
+pnpm run build
+
+# Start production build
+pnpm run start
+
+# Run tests
+pnpm run test
 ```
-
-### Deployment Checklist
-
-- [ ] Update all environment variables
-- [ ] Change default superadmin credentials
-- [ ] Enable HTTPS/TLS
-- [ ] Configure CORS for production domains
-- [ ] Set up database backups
-- [ ] Configure logging and monitoring
-- [ ] Set up rate limiting
-- [ ] Review security headers
-- [ ] Test OAuth2 flow end-to-end
-- [ ] Document deployment process
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Code Style
-
-- Follow TypeScript best practices
-- Use ESLint and Prettier configurations
-- Write meaningful commit messages
-- Add tests for new features
 
 ## 📄 License
 
@@ -566,17 +636,47 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **NestJS** and **Next.js** communities for amazing frameworks
 - **Yarey Tech** for organizing the hackathon and supporting open-source development
 
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**1. SMTP Email Errors**
+
+- Verify your SMTP credentials are correct
+- For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833)
+- Ensure special characters in passwords are URL-encoded
+- Check firewall/network allows SMTP connections
+
+**2. Docker Services Not Starting**
+
+- Ensure Docker is running
+- Check ports 4433, 4434, 4444, 4445, 5432 are not in use
+- Run `pnpm infra:down` then `pnpm infra:up` to restart
+
+**3. Database Connection Errors**
+
+- Wait a few seconds for PostgreSQL to fully start
+- Check `docker/.env` DSN configuration
+- Verify PostgreSQL container is running: `docker ps`
+
+**4. OAuth2 Flow Errors**
+
+- Ensure redirect URIs match exactly (including protocol and port)
+- Verify OAuth2 client is created in admin dashboard
+- Check client ID and secret are correct
+
+**5. JWT/Authentication Errors**
+
+- Verify `JWT_SECRET` is set in `apps/api/.env`
+- Ensure `NEXTAUTH_SECRET` is set in frontend `.env.local` files
+- Clear browser cookies and try again
+
 ## 📞 Support
 
 For questions, issues, or feature requests:
 
-- Open an issue on GitHub
-- Contact: [your-email@example.com]
+- Open an issue on [GitHub](https://github.com/ErgoCodes/ory-based-idp/issues)
+- Check existing issues for solutions
+- Review the documentation carefully
 
-## 🎥 Demo
-
-[Link to video demo - Coming soon]
-
----
-
-**Built with ❤️ for the Yarey Tech Hackathon**
+**Built with ❤️ by the Git Gud team for the Yarey Tech Hackathon**

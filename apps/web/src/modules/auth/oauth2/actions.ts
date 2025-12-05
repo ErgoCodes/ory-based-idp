@@ -93,7 +93,7 @@ export async function acceptConsent(
     }
 
     if (data.redirect_to) {
-      redirect(data.redirect_to)
+      return { success: true, redirect_to: data.redirect_to }
     }
 
     return { success: false, error: "Invalid response from server" }

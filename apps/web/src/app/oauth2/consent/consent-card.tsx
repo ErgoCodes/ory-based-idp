@@ -33,6 +33,11 @@ export function ConsentCard({ consentRequest, consentChallenge }: ConsentCardPro
 
       if (!result.success && result.error) {
         toast.error(result.error)
+        throw new Error(result.error)
+      }
+
+      if (result.success && result.redirect_to) {
+        window.location.href = result.redirect_to
       }
     } catch {
       toast.error("An unexpected error occurred")

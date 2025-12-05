@@ -209,7 +209,7 @@ cp docker/.env.example docker/.env
 cp apps/api/.env.example apps/api/.env
 
 # Admin Dashboard
-cp apps/web/.env.local.example apps/web/.env.local
+cp apps/web/.env.example apps/web/.env.local
 
 # OAuth2 Demo Client (optional)
 cp apps/client-oauth2-demo/.env.local.example apps/client-oauth2-demo/.env.local

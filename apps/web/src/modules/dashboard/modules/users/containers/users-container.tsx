@@ -18,7 +18,7 @@ export async function UsersContainer() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8">
+      <main className=" flex flex-col gap-6 container mx-auto px-4 py-8">
         <UsersHeader userCount={users.length} />
 
         {error && (

@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { AlertCircle } from "lucide-react"
 import { getConsentRequest } from "@/modules/auth/oauth2/actions"
-import { ConsentCard } from "./consent-card"
+import { ConsentCard } from "../../../modules/oauth/components/consent-card"
 
 interface ConsentPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>

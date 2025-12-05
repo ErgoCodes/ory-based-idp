@@ -228,11 +228,7 @@ export function CreateClientForm() {
             <FormItem>
               <FormLabel>Scopes</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="openid email profile"
-                  {...field}
-                  disabled={form.formState.isSubmitting}
-                />
+                <Input placeholder="openid email profile" {...field} disabled />
               </FormControl>
               <FormDescription>Space-separated list of scopes</FormDescription>
               <FormMessage />

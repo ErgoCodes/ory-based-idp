@@ -25,6 +25,8 @@ import {
 } from "@workspace/ui/components/form"
 import { toast } from "sonner"
 import { registerUser } from "../../../../lib/services/register"
+import RHFTextField from "@/components/common/rhf-text-field"
+import RHFSubmitButton from "@/components/common/rhf-submit-button"
 
 const registerSchema = z
   .object({
@@ -109,80 +111,30 @@ export function RegisterForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>First Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <RHFTextField name="firstName" label="First Name" placeholder="John" required />
+              <RHFTextField name="lastName" label="Last Name" placeholder="Doe" required />
             </div>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="you@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <RHFTextField name="email" label="Email" placeholder="you@example.com" required />
 
-            <FormField
-              control={form.control}
+            <RHFTextField
               name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormDescription>At least 8 characters</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Password"
+              placeholder="••••••••"
+              required
+              useCase="password"
             />
 
-            <FormField
-              control={form.control}
+            <RHFTextField
               name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Confirm Password"
+              placeholder="••••••••"
+              required
+              useCase="password"
             />
-
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Creating account..." : "Create Account"}
-            </Button>
+            <div className="flex w-full justify-center">
+              <RHFSubmitButton label="Create Account" disabled={loading} />
+            </div>
           </form>
         </Form>
 

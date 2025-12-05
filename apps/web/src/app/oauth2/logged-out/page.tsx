@@ -1,4 +1,4 @@
-import { LoggedOutCard } from "./components/logged-out-card"
+import { LoggedOutCard } from "../../../modules/oauth/components/logged-out-card"
 
 export default function LoggedOutPage() {
   return (

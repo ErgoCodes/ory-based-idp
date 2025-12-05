@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useFormState, useFormStatus } from "react-dom"
 import { Trash2 } from "lucide-react"
-import { deleteClient } from "../actions"
+import { deleteClient } from "../../../lib/services/delete-client-actions"
 
 import {
   AlertDialog,
@@ -14,7 +14,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog"
 import { Button } from "@workspace/ui/components/button"
 import { toast } from "sonner" // Assuming sonner is used, or use another toast if available. If not sure, I'll skip or use standard alert.

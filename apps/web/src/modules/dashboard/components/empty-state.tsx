@@ -32,12 +32,6 @@ export function EmptyState({ createLink }: EmptyStateProps) {
             Create Your First Client
           </Link>
         </Button>
-        <Button variant="outline" size="lg" asChild>
-          <Link href="/docs/oauth2" className="gap-2">
-            <FileText className="h-5 w-5" />
-            View Documentation
-          </Link>
-        </Button>
       </div>
     </div>
   )

@@ -56,6 +56,7 @@ export function VerificationForm({ flowId }: VerificationFormProps) {
         toast.error(result.error)
       } else {
         toast.success("Email verified successfully!")
+        window.location.href = "/"
       }
     } catch (error) {
       toast.error("An unexpected error occurred")

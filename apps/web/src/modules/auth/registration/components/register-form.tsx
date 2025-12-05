@@ -66,10 +66,30 @@ export function RegisterForm() {
         lastName: data.lastName,
       })
 
-      if (!result.success && result.error) {
+      console.log("Registration result:", result)
+
+      if (result.shouldRedirect) {
+        console.log("Redirecting to verification page...")
+        console.log("FlowId received:", result.flowId)
+
+        if (result.error) {
+          toast.warning(result.error)
+        } else {
+          toast.success("Registration successful! Verification email sent.")
+        }
+
+        // Redirect to verification page with flowId
+        if (result.flowId) {
+          const redirectUrl = `/verification?flow=${result.flowId}`
+          console.log("Redirecting to:", redirectUrl)
+          window.location.href = redirectUrl
+        } else {
+          console.warn("No flowId received, redirecting to notice page")
+          // Fallback to notice page if no flowId
+          window.location.href = "/verification/notice"
+        }
+      } else if (result.error) {
         toast.error(result.error)
-      } else {
-        toast.success("Registration successful! Verification email sent.")
       }
     } catch (error) {
       toast.error("An unexpected error occurred")

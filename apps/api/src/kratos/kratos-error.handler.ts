@@ -42,6 +42,16 @@ export class KratosErrorHandler {
       };
     }
 
+    // Handle 410 - Flow expired or replaced
+    if (error.response?.status === 410 || error.status === 410) {
+      return {
+        code: 'flow_expired',
+        message: `The ${operation.replace('_', ' ')} has expired or been replaced`,
+        hint: 'Please request a new verification code',
+        statusCode: 410,
+      };
+    }
+
     // Handle connection errors - Kratos unavailable
     if (
       error.code === 'ECONNREFUSED' ||

@@ -117,7 +117,22 @@ export class AuthController {
       required: ['email'],
     },
   })
-  @ApiResponse({ status: 200, description: 'Email sent successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email sent successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        value: {
+          type: 'object',
+          properties: {
+            flowId: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
   @ApiResponse({ status: 400, description: 'Invalid email' })
   async send_verification_email(
     @Body(new ZodValidationPipe(sendEmailSchema)) emailData: SendEmailDto,
@@ -125,15 +140,16 @@ export class AuthController {
     const emailResult = await this.kratosService.startVerification(
       emailData.email,
     );
-    emailResult;
+
     if (!emailResult.success) {
-      console.log('emailResult');
-      console.log(emailResult);
+      console.error('[send_verification_email] Failed:', emailResult.error);
       return emailResult;
     }
 
-    // const { flow } = emailResult.value;
-
+    console.log(
+      '[send_verification_email] Success, flowId:',
+      emailResult.value.flowId,
+    );
     return emailResult;
   }
 
@@ -236,12 +252,15 @@ export class AuthController {
     }
 
     console.log('[Controller] Recovery completed successfully');
-    const token = result.value.continueWith?.find(
+    const continueWithToken = result.value.continueWith?.find(
       (c) => c.action === 'set_ory_session_token',
-    )?.ory_session_token;
-    if (!token) {
+    );
+
+    if (!continueWithToken || !('ory_session_token' in continueWithToken)) {
       return res.status(400).json({ error: 'No session token returned' });
     }
+
+    const token = continueWithToken.ory_session_token;
     console.log(token);
     res.cookie('ory_session_token', token, {
       httpOnly: true, // not accessible via JS

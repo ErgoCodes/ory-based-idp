@@ -70,7 +70,39 @@ export class KratosService {
         statusCode: 500,
       });
     } catch (error) {
-      console.log(error);
+      console.error('[registerUser] Error occurred:', error);
+
+      // Try to extract the response body if available
+      if (error && typeof error === 'object' && 'response' in error) {
+        const response = (error as any).response;
+        if (response && typeof response.json === 'function') {
+          try {
+            const errorBody = await response.json();
+            console.error(
+              '[registerUser] Error response body:',
+              JSON.stringify(errorBody, null, 2),
+            );
+
+            // Check for specific error messages from Kratos
+            if (errorBody.ui?.messages) {
+              const errorMessages = errorBody.ui.messages
+                .filter((msg: any) => msg.type === 'error')
+                .map((msg: any) => msg.text);
+
+              if (errorMessages.length > 0) {
+                return ResultUtils.err({
+                  code: 'registration_failed',
+                  message: errorMessages[0],
+                  statusCode: 400,
+                });
+              }
+            }
+          } catch (e) {
+            console.error('[registerUser] Could not parse error response');
+          }
+        }
+      }
+
       const kratosError = KratosErrorHandler.handle(
         error as never,
         'registration',
@@ -339,12 +371,31 @@ export class KratosService {
     try {
       // 1. Create a new verification flow
       const flow = await this.frontendApi.createNativeVerificationFlow();
-      console.log('start Verification Flow');
-      console.log(flow);
-      return ResultUtils.ok({ flowId: flow.id });
+      console.log('[startVerification] Flow created:', flow.id);
+
+      // 2. Submit the email to trigger verification email
+      const response = await this.frontendApi.updateVerificationFlow({
+        flow: flow.id,
+        updateVerificationFlowBody: {
+          method: 'code',
+          email,
+        },
+      });
+
+      console.log('[startVerification] Email sent, flow:', response.id);
+      console.log('[startVerification] ui.messages:', response.ui.messages);
+
+      if (response?.id) {
+        return ResultUtils.ok({ flowId: response.id });
+      }
+
+      return ResultUtils.err({
+        code: 'verification_failed',
+        message: 'Could not start verification flow',
+        statusCode: 500,
+      });
     } catch (error) {
-      console.log('start Verification Flow Error');
-      console.log(error);
+      console.error('[startVerification] Error:', error);
       const kratosError = KratosErrorHandler.handle(
         error as never,
         'verification_flow',

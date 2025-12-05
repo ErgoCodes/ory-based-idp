@@ -20,6 +20,7 @@ const frontendApiProvider = {
       basePath: kratosPublicUrl,
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       fetchApi: fetch,
     });

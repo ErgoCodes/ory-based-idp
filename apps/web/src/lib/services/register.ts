@@ -1,16 +1,12 @@
-"use server"
-
-import { redirect } from "next/navigation"
-
 interface RegistrationResult {
   success: boolean
   error?: string
+  shouldRedirect?: boolean
+  flowId?: string
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
-
 /**
- * Register a new user
+ * Register a new user (Client-side function)
  */
 export async function registerUser(data: {
   email: string
@@ -18,12 +14,27 @@ export async function registerUser(data: {
   firstName: string
   lastName: string
 }): Promise<RegistrationResult> {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
+
   if (!API_URL) {
     return { success: false, error: "API URL not configured" }
   }
 
   try {
-    const response = await fetch(`${API_URL}/auth/registration`, {
+    // First, create a registration flow
+    const flowResponse = await fetch(`${API_URL}/auth/registration/init`, {
+      method: "GET",
+    })
+
+    if (!flowResponse.ok) {
+      return { success: false, error: "Failed to initialize registration flow" }
+    }
+
+    const flowData = await flowResponse.json()
+    const flowId = flowData.id
+
+    // Then register with the flow ID
+    const response = await fetch(`${API_URL}/auth/registration?flow=${flowId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,24 +49,36 @@ export async function registerUser(data: {
 
     if (!response.ok) {
       const errorData = await response.json()
+      console.error("Registration failed:", errorData)
       return {
         success: false,
-        error: errorData.message || "Registration failed",
+        error:
+          errorData.message ||
+          errorData.error ||
+          JSON.stringify(errorData) ||
+          "Registration failed",
       }
     }
 
     // Send verification email after successful registration
-    const emailResult = await sendVerificationEmail(data.email)
+    const emailResult = await sendVerificationEmail(data.email, API_URL)
+    console.log({ emailResult })
 
     if (!emailResult.success) {
+      // Registration succeeded but email failed - still redirect but show warning
       return {
-        success: false,
+        success: true,
+        shouldRedirect: true,
         error: emailResult.error || "Registration succeeded but verification email failed",
       }
     }
 
-    // Redirect to verification notice page
-    redirect("/verification/notice")
+    // Redirect to verification page with flowId
+    return {
+      success: true,
+      shouldRedirect: true,
+      flowId: emailResult.flowId,
+    }
   } catch (error) {
     console.error("Registration error:", error)
     return { success: false, error: "Failed to connect to server" }
@@ -65,13 +88,9 @@ export async function registerUser(data: {
 /**
  * Send verification email
  */
-async function sendVerificationEmail(email: string): Promise<RegistrationResult> {
-  if (!API_URL) {
-    return { success: false, error: "API URL not configured" }
-  }
-
+async function sendVerificationEmail(email: string, apiUrl: string): Promise<RegistrationResult> {
   try {
-    const response = await fetch(`${API_URL}/auth/send-verif-email`, {
+    const response = await fetch(`${apiUrl}/auth/send-verif-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -87,7 +106,13 @@ async function sendVerificationEmail(email: string): Promise<RegistrationResult>
       }
     }
 
-    return { success: true }
+    const data = await response.json()
+    console.log("Verification email response:", data)
+    console.log("Extracted flowId:", data.value?.flowId)
+    return {
+      success: true,
+      flowId: data.value?.flowId,
+    }
   } catch (error) {
     console.error("Verification email error:", error)
     return { success: false, error: "Failed to send verification email" }

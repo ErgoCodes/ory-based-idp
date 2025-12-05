@@ -42,7 +42,7 @@ export async function verifyEmail(flowId: string, code: string): Promise<Verific
     }
 
     // Redirect to home page on success
-    redirect("/")
+    return { success: true }
   } catch (error) {
     console.error("Verification error:", error)
     return { success: false, error: "Failed to verify email" }

@@ -25,8 +25,10 @@ export async function DashboardView() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <ClientsListHeader total={data.length} />
+    <div className="flex flex-col container mx-auto gap-6  p-6">
+      <div>
+        <ClientsListHeader total={data.length} />
+      </div>
 
       {data.error && (
         <div className="mb-6 p-4 border border-destructive bg-destructive/10 rounded-md">

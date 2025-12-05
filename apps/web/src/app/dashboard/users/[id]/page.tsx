@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth/auth-config"
 
-import { UserDetailsView } from "./user-details-view"
+import { UserDetailsView } from "../../../../modules/dashboard/modules/users/components/user-details-view"
 import { getUser } from "@/lib/services/user"
 
 interface UserDetailsPageProps {

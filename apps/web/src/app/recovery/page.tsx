@@ -2,15 +2,16 @@ import { RecoveryCodeForm } from "@/components/auth/recovery-code-form"
 import { redirect } from "next/navigation"
 
 interface RecoveryCodePageProps {
-  searchParams: {
+  searchParams: Promise<{
     flowId?: string
-  }
+  }>
 }
 
-export default function RecoveryCodePage({ searchParams }: RecoveryCodePageProps) {
-  const flowId = searchParams.flowId
+export default async function RecoveryCodePage(props: RecoveryCodePageProps) {
+  const searchParams = await props.searchParams
+  console.log(searchParams)
 
-  if (!flowId) {
+  if (!searchParams.flowId) {
     // If no flowId is present, we can't verify the code.
     // Redirect to login page as a fallback.
     redirect("/auth/login")
@@ -18,7 +19,7 @@ export default function RecoveryCodePage({ searchParams }: RecoveryCodePageProps
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <RecoveryCodeForm flowId={flowId} />
+      <RecoveryCodeForm flowId={searchParams.flowId} />
     </div>
   )
 }

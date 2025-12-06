@@ -1,6 +1,6 @@
 import LoginFormContainer from "@/modules/auth/login/containers/login-form-container"
 
-function LoginPage() {
+async function LoginPage() {
   return <LoginFormContainer />
 }
 

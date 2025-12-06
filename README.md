@@ -288,7 +288,7 @@ These variables configure Ory Kratos, Ory Hydra, and PostgreSQL:
 | --------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- | -------- |
 | `DSN`                                         | PostgreSQL connection string         | `postgres://admin:secret@postgres:5432/kratos_db?sslmode=disable` | ✅       |
 | `SECRETS_COOKIE`                              | Cookie encryption secret (32+ chars) | Generate with `openssl rand -hex 32`                              | ✅       |
-| `SECRETS_CIPHER`                              | Cipher encryption secret (32+ chars) | Generate with `openssl rand -hex 32`                              | ✅       |
+| `SECRETS_CIPHER`                              | Cipher encryption secret (32 chars) | Generate with `openssl rand -hex 16`                               | ✅       |
 | `COURIER_SMTP_CONNECTION_URI`                 | SMTP server for emails               | `smtp://user:pass@smtp.gmail.com:587/`                            | ✅       |
 | `COURIER_SMTP_FROM_ADDRESS`                   | Sender email address                 | `noreply@example.com`                                             | ✅       |
 | `COURIER_SMTP_FROM_NAME`                      | Sender display name                  | `Your App Name`                                                   | ✅       |

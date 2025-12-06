@@ -1,66 +1,66 @@
-"use client";
+"use client"
 
-import { signIn } from "next-auth/react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
+import { signIn } from "next-auth/react"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
 
 function LoginForm() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const errorParam = searchParams.get("error");
+    const errorParam = searchParams.get("error")
     if (errorParam) {
-      setError(getErrorMessage(errorParam));
+      setError(getErrorMessage(errorParam))
     }
-  }, [searchParams]);
+  }, [searchParams])
 
   const getErrorMessage = (error: string): string => {
     switch (error) {
       case "Callback":
       case "OAuthCallback":
-        return "Invalid credentials. Please check your email and password.";
+        return "Invalid credentials. Please check your email and password."
       case "OAuthSignin":
-        return "Error connecting to the authentication provider.";
+        return "Error connecting to the authentication provider."
       case "OAuthCreateAccount":
       case "EmailCreateAccount":
-        return "Could not create account. Please try again.";
+        return "Could not create account. Please try again."
       case "OAuthAccountNotLinked":
-        return "This account is already linked to another provider.";
+        return "This account is already linked to another provider."
       case "EmailSignin":
-        return "Error sending verification email.";
+        return "Error sending verification email."
       case "CredentialsSignin":
-        return "Invalid credentials. Please try again.";
+        return "Invalid credentials. Please try again."
       case "SessionRequired":
-        return "Please sign in to access this page.";
+        return "Please sign in to access this page."
       default:
-        return "An authentication error occurred. Please try again.";
+        return "An authentication error occurred. Please try again."
     }
-  };
+  }
 
   const handleLogin = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
     try {
       const result = await signIn("hydra", {
         redirect: false,
         callbackUrl: "/",
-      });
+      })
 
       if (result?.error) {
-        setError(getErrorMessage(result.error));
-        setLoading(false);
+        setError(getErrorMessage(result.error))
+        setLoading(false)
       } else if (result?.ok) {
-        router.push("/");
+        router.push("/")
       }
     } catch {
-      setError("An unexpected error occurred. Please try again.");
-      setLoading(false);
+      setError("An unexpected error occurred. Please try again.")
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div style={styles.container}>
@@ -86,12 +86,10 @@ function LoginForm() {
           {loading ? "Signing in..." : "Sign in with OAuth2"}
         </button>
 
-        <p style={styles.bottomNote}>
-          You will be redirected to the authentication provider
-        </p>
+        <p style={styles.bottomNote}>You will be redirected to the authentication provider</p>
       </div>
     </div>
-  );
+  )
 }
 
 export default function LoginPage() {
@@ -108,7 +106,7 @@ export default function LoginPage() {
     >
       <LoginForm />
     </Suspense>
-  );
+  )
 }
 
 /* ---------------------------------------------------
@@ -194,4 +192,4 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
-};
+}

@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react"
 
 export default function HomePage() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession()
 
-  const handleLogin = () => signIn("hydra");
-  const handleLogout = () => signOut({ callbackUrl: "/" });
+  const handleLogin = () => signIn("hydra")
+  const handleLogout = () => signOut({ callbackUrl: "/" })
 
   if (status === "loading") {
     return (
@@ -16,7 +16,7 @@ export default function HomePage() {
           <p style={{ marginTop: "1rem", color: "#444" }}>Loading...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -29,16 +29,10 @@ export default function HomePage() {
             <div style={styles.sessionBox}>
               <p style={styles.sessionHeader}>✓ Authenticated with NextAuth</p>
 
-              {session.user?.name && (
-                <p style={styles.sessionText}>Name: {session.user.name}</p>
-              )}
-              {session.user?.email && (
-                <p style={styles.sessionText}>Email: {session.user.email}</p>
-              )}
+              {session.user?.name && <p style={styles.sessionText}>Name: {session.user.name}</p>}
+              {session.user?.email && <p style={styles.sessionText}>Email: {session.user.email}</p>}
 
-              {"id" in session.user && (
-                <p style={styles.sessionId}>ID: {session.user.id}</p>
-              )}
+              {"id" in session.user && <p style={styles.sessionId}>ID: {session.user.id}</p>}
 
               {(session as any).error && (
                 <p style={styles.error}>
@@ -83,7 +77,7 @@ export default function HomePage() {
         </p>
       </div>
     </div>
-  );
+  )
 }
 
 /* ---------------------------------------------------
@@ -111,8 +105,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     alignItems: "center",
     gap: "1.2rem",
-    boxShadow:
-      "0 4px 10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06)",
+    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06)",
     border: "1px solid #e5e7eb",
   },
 
@@ -225,4 +218,4 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
-};
+}

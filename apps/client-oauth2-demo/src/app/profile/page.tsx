@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
+  const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/");
+      router.push("/")
     }
-  }, [status, router]);
+  }, [status, router])
 
-  const handleLogout = () => signOut({ callbackUrl: "/" });
+  const handleLogout = () => signOut({ callbackUrl: "/" })
 
   if (status === "loading") {
     return (
@@ -24,10 +24,10 @@ export default function ProfilePage() {
           <p style={{ marginTop: "1rem", color: "#444" }}>Loading your profile...</p>
         </div>
       </div>
-    );
+    )
   }
 
-  if (!session) return null;
+  if (!session) return null
 
   const initials =
     session.user.name
@@ -37,7 +37,7 @@ export default function ProfilePage() {
       .toUpperCase()
       .slice(0, 2) ||
     session.user.email?.[0]?.toUpperCase() ||
-    "U";
+    "U"
 
   return (
     <div style={styles.container}>
@@ -92,17 +92,11 @@ export default function ProfilePage() {
 
         {/* BUTTONS */}
         <div style={styles.buttonColumn}>
-          <button
-            onClick={() => router.push("/protected")}
-            style={styles.primaryButton}
-          >
+          <button onClick={() => router.push("/protected")} style={styles.primaryButton}>
             Go to Protected Page
           </button>
 
-          <button
-            onClick={() => router.push("/")}
-            style={styles.secondaryButton}
-          >
+          <button onClick={() => router.push("/")} style={styles.secondaryButton}>
             Back to Home
           </button>
 
@@ -120,7 +114,7 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 /* ---------------------------------------------------
@@ -312,4 +306,4 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
-};
+}

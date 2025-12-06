@@ -24,14 +24,14 @@ export function UsersHeader({ userCount }: UsersHeaderProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        {/* <div className="flex gap-2">
           <Button asChild>
             <Link href="/dashboard/users/new" className="gap-2">
               <UserPlus className="h-4 w-4" />
               Add User
             </Link>
           </Button>
-        </div>
+        </div> */}
       </div>
     </div>
   )

@@ -1,13 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useFormState, useFormStatus } from "react-dom"
-import { Trash2 } from "lucide-react"
-import { deleteClient } from "../../../lib/services/delete-client-actions"
-
+import { useEffect } from "react"
+import { useActionState } from "react"
+import { Button } from "@workspace/ui/components/button"
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -15,15 +12,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog"
-import { Button } from "@workspace/ui/components/button"
-import { toast } from "sonner" // Assuming sonner is used, or use another toast if available. If not sure, I'll skip or use standard alert.
-// Wait, I don't know if sonner is installed. I'll check package.json or just use console/alert if not sure.
-// But Shadcn usually comes with sonner or toaster. I'll check imports in other files if I can.
-// For now, I'll omit toast and just rely on UI state.
+import { deleteClient } from "../../../lib/services/delete-client-actions"
+import { useFormStatus } from "react-dom"
 
 const initialState = {
   success: false,
-  error: undefined,
+  error: undefined as string | undefined,
 }
 
 function DeleteButton() {
@@ -47,12 +41,12 @@ export function DeleteClientDialog({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const [state, formAction] = useFormState(deleteClient, null)
+  // ✅ Updated API
+  const [state, formAction] = useActionState(deleteClient, initialState)
 
   useEffect(() => {
     if (state?.success) {
       onOpenChange(false)
-      // Optional: Show success toast
     }
   }, [state?.success, onOpenChange])
 
@@ -62,8 +56,8 @@ export function DeleteClientDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the client
-            <span className="font-medium text-foreground"> {clientName}</span> and remove its data
+            This action cannot be undone. This will permanently delete the client{" "}
+            <span className="font-medium text-foreground">{clientName}</span> and remove its data
             from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -72,6 +66,8 @@ export function DeleteClientDialog({
 
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+          {/* Form action properly triggers server action */}
           <form action={formAction}>
             <input type="hidden" name="clientId" value={clientId} />
             <DeleteButton />

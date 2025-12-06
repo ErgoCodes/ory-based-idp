@@ -1,18 +1,18 @@
-"use client";
+"use client"
 
-import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useSession, signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function ProtectedPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/");
+      router.push("/")
     }
-  }, [status, router]);
+  }, [status, router])
 
   if (status === "loading") {
     return (
@@ -22,10 +22,10 @@ export default function ProtectedPage() {
           <p style={{ marginTop: "1rem", color: "#444" }}>Loading...</p>
         </div>
       </div>
-    );
+    )
   }
 
-  if (!session) return null;
+  if (!session) return null
 
   return (
     <div style={styles.container}>
@@ -36,17 +36,11 @@ export default function ProtectedPage() {
         <div style={styles.sessionBox}>
           <p style={styles.sessionHeader}>✓ Authenticated with NextAuth</p>
 
-          {session.user.name && (
-            <p style={styles.sessionText}>Name: {session.user.name}</p>
-          )}
+          {session.user.name && <p style={styles.sessionText}>Name: {session.user.name}</p>}
 
-          {session.user.email && (
-            <p style={styles.sessionText}>Email: {session.user.email}</p>
-          )}
+          {session.user.email && <p style={styles.sessionText}>Email: {session.user.email}</p>}
 
-          {"id" in session.user && (
-            <p style={styles.sessionId}>ID: {session.user.id}</p>
-          )}
+          {"id" in session.user && <p style={styles.sessionId}>ID: {session.user.id}</p>}
 
           {(session as any).error && (
             <p style={styles.error}>
@@ -60,24 +54,15 @@ export default function ProtectedPage() {
 
         {/* Buttons */}
         <div style={styles.buttonColumn}>
-          <button
-            onClick={() => router.push("/profile")}
-            style={styles.primaryButton}
-          >
+          <button onClick={() => router.push("/profile")} style={styles.primaryButton}>
             Go to Profile
           </button>
 
-          <button
-            onClick={() => router.push("/")}
-            style={styles.secondaryButton}
-          >
+          <button onClick={() => router.push("/")} style={styles.secondaryButton}>
             Back to Home
           </button>
 
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            style={styles.logoutButton}
-          >
+          <button onClick={() => signOut({ callbackUrl: "/" })} style={styles.logoutButton}>
             Logout
           </button>
         </div>
@@ -86,14 +71,13 @@ export default function ProtectedPage() {
         <div style={styles.infoBox}>
           <h2 style={styles.infoTitle}>About this page</h2>
           <p style={styles.infoText}>
-            This is a protected page that requires authentication. NextAuth.js
-            automatically handles token refresh, so your session remains active
-            even after the access token expires.
+            This is a protected page that requires authentication. NextAuth.js automatically handles
+            token refresh, so your session remains active even after the access token expires.
           </p>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 /* ---------------------------------------------------
@@ -117,8 +101,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "12px",
     width: "100%",
     maxWidth: "620px",
-    boxShadow:
-      "0 4px 10px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.07)",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.07)",
     border: "1px solid #e5e7eb",
   },
 
@@ -232,4 +215,4 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
-};
+}
